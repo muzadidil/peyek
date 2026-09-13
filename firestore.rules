@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Hanya request yang sudah authenticated (termasuk anonymous auth)
+    // yang boleh baca/tulis. Jangan ganti jadi "allow read, write: if true"
+    // karena itu membuat database terbuka untuk siapa saja di internet.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

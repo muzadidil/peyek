@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16233A">
+<title>Buku Peyek</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#16233A;
+  --navy-light:#223354;
+  --gold:#C98A2C;
+  --gold-light:#E3B15A;
+  --bg:#F7F5F1;
+  --surface:#FFFFFF;
+  --text:#1C2430;
+  --muted:#6B7280;
+  --border:#E4E1DA;
+  --danger:#C0392B;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  padding-bottom:3rem;
+}
+h1,h2,h3,h4,h5,.brand{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:700;}
+.navbar-peyek{background:var(--navy);}
+.navbar-peyek .brand{color:var(--gold-light);font-weight:800;letter-spacing:.2px;}
+.navbar-peyek .nav-link{color:rgba(255,255,255,.78);font-weight:500;padding:.5rem .9rem;border-radius:6px;}
+.navbar-peyek .nav-link:hover{color:#fff;}
+.navbar-peyek .nav-link.active{color:#fff;background:rgba(255,255,255,.1);}
+.navbar-peyek .navbar-toggler{border-color:rgba(255,255,255,.3);}
+.navbar-peyek .navbar-toggler-icon{
+  background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,0.85)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+.section-title{font-size:1.15rem;font-weight:700;margin-bottom:.9rem;color:var(--navy);}
+.card-soft{background:var(--surface);border:1px solid var(--border);border-radius:10px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:8px;padding:1rem 1.1rem;}
+.stat-label{font-size:.78rem;color:var(--muted);margin-bottom:.25rem;}
+.stat-value{font-size:1.3rem;font-weight:700;color:var(--navy);}
+.btn-navy{background:var(--navy);border-color:var(--navy);color:#fff;}
+.btn-navy:hover{background:var(--navy-light);border-color:var(--navy-light);color:#fff;}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#fff;}
+.btn-gold:hover{background:#B87A22;border-color:#B87A22;color:#fff;}
+.route-section{display:none;}
+.route-section.active{display:block;}
+.row-item{background:#FCFBF9;border:1px solid var(--border);border-radius:8px;padding:.6rem .7rem;margin-bottom:.5rem;}
+.subtotal-display{font-weight:600;color:var(--navy);}
+.hasil-box{background:#FCF6EA;border:1px solid #EBD8AE;border-radius:10px;padding:1rem 1.2rem;}
+.hasil-box .final{font-size:1.4rem;font-weight:800;color:var(--navy);}
+.table-sm-rp td{vertical-align:middle;}
+.empty-state{text-align:center;color:var(--muted);padding:1.5rem .5rem;font-size:.92rem;}
+.notify-area{position:fixed;top:1rem;right:1rem;left:1rem;z-index:2000;max-width:420px;margin-left:auto;}
+@media (min-width:576px){.notify-area{left:auto;}}
+.badge-toko{background:#EEF1F6;color:var(--navy);font-weight:500;}
+footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:2rem;}
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-peyek mb-4">
+  <div class="container">
+    <a class="navbar-brand brand" href="#/beranda">Buku Peyek</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" data-route="beranda" href="#/beranda">Beranda</a></li>
+        <li class="nav-item"><a class="nav-link" data-route="belanja" href="#/belanja">Belanja</a></li>
+        <li class="nav-item"><a class="nav-link" data-route="produksi" href="#/produksi">Produksi</a></li>
+        <li class="nav-item"><a class="nav-link" data-route="penjualan" href="#/penjualan">Penjualan</a></li>
+        <li class="nav-item"><a class="nav-link" data-route="master" href="#/master">Master</a></li>
+        <li class="nav-item"><a class="nav-link" data-route="laporan" href="#/laporan">Laporan</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div id="notify-area" class="notify-area"></div>
+
+<div class="container">
+
+  <!-- BERANDA -->
+  <section id="route-beranda" class="route-section">
+    <h2 class="section-title">Ringkasan Bulan Ini</h2>
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">Total Belanja</div>
+          <div class="stat-value" id="dash-belanja">Rp 0</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">Produksi</div>
+          <div class="stat-value" id="dash-produksi">0 batch</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">Penjualan</div>
+          <div class="stat-value" id="dash-penjualan">Rp 0</div>
+        </div>
+      </div>
+    </div>
+    <p class="text-muted small mt-3">Data dihitung dari tanggal 1 sampai akhir bulan berjalan.</p>
+  </section>
+
+  <!-- BELANJA -->
+  <section id="route-belanja" class="route-section">
+    <h2 class="section-title">Catat Belanja Bahan</h2>
+    <div class="card-soft p-3 mb-4" id="belanja-form">
+      <div class="row g-2 mb-2">
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-1">Tanggal</label>
+          <input type="date" class="form-control form-control-sm" id="belanja-tanggal">
+        </div>
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-1">Toko Kulak</label>
+          <input type="text" class="form-control form-control-sm" id="belanja-toko" list="toko-list" placeholder="Nama toko">
+        </div>
+      </div>
+
+      <div id="belanja-items"></div>
+
+      <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="btn-tambah-baris-belanja">+ Tambah Bahan</button>
+
+      <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+        <span class="fw-semibold">Total Belanja</span>
+        <span class="fw-bold" id="belanja-total-display">Rp 0</span>
+      </div>
+
+      <button type="button" class="btn btn-navy w-100 mt-3" id="btn-simpan-belanja">Simpan Belanja</button>
+    </div>
+
+    <h3 class="section-title" style="font-size:1rem;">Riwayat Belanja</h3>
+    <div class="table-responsive card-soft p-2">
+      <table class="table table-sm table-sm-rp mb-0">
+        <thead><tr><th>Tanggal</th><th>Toko</th><th class="text-end">Total</th><th></th></tr></thead>
+        <tbody id="riwayat-belanja-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PRODUKSI -->
+  <section id="route-produksi" class="route-section">
+    <h2 class="section-title">Kalkulator Produksi Peyek</h2>
+    <div class="card-soft p-3 mb-4" id="produksi-form">
+      <label class="form-label small mb-1">Tanggal</label>
+      <input type="date" class="form-control form-control-sm mb-3" id="produksi-tanggal" style="max-width:200px;">
+
+      <label class="form-label small mb-1 fw-semibold">Bahan</label>
+      <div id="produksi-items"></div>
+      <button type="button" class="btn btn-sm btn-outline-secondary mt-1 mb-3" id="btn-tambah-baris-produksi">+ Tambah Bahan</button>
+
+      <div class="row g-2 mb-2">
+        <div class="col-6">
+          <label class="form-label small mb-1">Harga Gas / Tabung</label>
+          <input type="number" class="form-control form-control-sm" id="gas-harga" placeholder="22000">
+        </div>
+        <div class="col-6">
+          <label class="form-label small mb-1">Kapasitas (toples/tabung)</label>
+          <input type="number" class="form-control form-control-sm" id="gas-kapasitas" placeholder="15">
+        </div>
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="form-label small mb-1">Harga Toples / pcs</label>
+          <input type="number" class="form-control form-control-sm" id="toples-harga" placeholder="17000">
+        </div>
+        <div class="col-6">
+          <label class="form-label small mb-1">Jumlah Toples Dihasilkan</label>
+          <input type="number" class="form-control form-control-sm" id="toples-jumlah" placeholder="4">
+        </div>
+      </div>
+
+      <div class="hasil-box">
+        <div class="d-flex justify-content-between small mb-1"><span>Total Bahan</span><span id="hasil-total-bahan">Rp 0</span></div>
+        <div class="d-flex justify-content-between small mb-1"><span>Biaya Gas</span><span id="hasil-biaya-gas">Rp 0</span></div>
+        <div class="d-flex justify-content-between small mb-2"><span>Biaya Toples</span><span id="hasil-biaya-toples">Rp 0</span></div>
+        <div class="d-flex justify-content-between border-top pt-2 mb-1"><span class="fw-semibold">Total Modal</span><span class="fw-semibold" id="hasil-total-modal">Rp 0</span></div>
+        <div class="d-flex justify-content-between"><span class="fw-semibold">Harga / Toples</span><span class="final" id="hasil-harga-per-toples">Rp 0</span></div>
+      </div>
+
+      <button type="button" class="btn btn-navy w-100 mt-3" id="btn-simpan-produksi">Simpan Produksi</button>
+    </div>
+
+    <h3 class="section-title" style="font-size:1rem;">Riwayat Produksi</h3>
+    <div class="table-responsive card-soft p-2">
+      <table class="table table-sm table-sm-rp mb-0">
+        <thead><tr><th>Tanggal</th><th>Toples</th><th class="text-end">Modal</th><th class="text-end">/Toples</th><th></th></tr></thead>
+        <tbody id="riwayat-produksi-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PENJUALAN -->
+  <section id="route-penjualan" class="route-section">
+    <h2 class="section-title">Catat Penjualan</h2>
+    <div class="card-soft p-3 mb-4">
+      <div class="row g-2 mb-2">
+        <div class="col-6 col-md-3">
+          <label class="form-label small mb-1">Tanggal</label>
+          <input type="date" class="form-control form-control-sm" id="jual-tanggal">
+        </div>
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-1">Nama Pembeli</label>
+          <input type="text" class="form-control form-control-sm" id="jual-nama">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-1">Jml Toples</label>
+          <input type="number" class="form-control form-control-sm" id="jual-qty">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label small mb-1">Harga Jual / Toples</label>
+          <input type="number" class="form-control form-control-sm" id="jual-harga">
+        </div>
+      </div>
+      <label class="form-label small mb-1">Catatan (opsional)</label>
+      <input type="text" class="form-control form-control-sm mb-2" id="jual-catatan">
+
+      <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+        <span class="fw-semibold">Total</span>
+        <span class="fw-bold" id="jual-total-display">Rp 0</span>
+      </div>
+
+      <button type="button" class="btn btn-gold w-100 mt-3" id="btn-simpan-penjualan">Simpan &amp; Cetak Nota</button>
+    </div>
+
+    <h3 class="section-title" style="font-size:1rem;">Riwayat Penjualan</h3>
+    <div class="table-responsive card-soft p-2">
+      <table class="table table-sm table-sm-rp mb-0">
+        <thead><tr><th>Tanggal</th><th>Pembeli</th><th class="text-end">Total</th><th></th></tr></thead>
+        <tbody id="riwayat-penjualan-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MASTER -->
+  <section id="route-master" class="route-section">
+    <h2 class="section-title">Master Data</h2>
+    <div class="row g-4">
+      <div class="col-12 col-md-6">
+        <h3 class="section-title" style="font-size:1rem;">Bahan</h3>
+        <div class="card-soft p-3 mb-3">
+          <div class="d-flex gap-2">
+            <input type="text" class="form-control form-control-sm" id="master-bahan-nama" placeholder="Nama bahan">
+            <input type="number" class="form-control form-control-sm" id="master-bahan-harga" placeholder="Harga" style="max-width:120px;">
+            <button class="btn btn-sm btn-navy" id="btn-tambah-master-bahan">+</button>
+          </div>
+        </div>
+        <div class="table-responsive card-soft p-2">
+          <table class="table table-sm table-sm-rp mb-0">
+            <thead><tr><th>Nama</th><th class="text-end">Harga Terakhir</th><th></th></tr></thead>
+            <tbody id="master-bahan-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <h3 class="section-title" style="font-size:1rem;">Toko Kulak</h3>
+        <div class="card-soft p-3 mb-3">
+          <div class="d-flex gap-2">
+            <input type="text" class="form-control form-control-sm" id="master-toko-nama" placeholder="Nama toko">
+            <button class="btn btn-sm btn-navy" id="btn-tambah-master-toko">+</button>
+          </div>
+        </div>
+        <div class="table-responsive card-soft p-2">
+          <table class="table table-sm table-sm-rp mb-0">
+            <thead><tr><th>Nama</th><th></th></tr></thead>
+            <tbody id="master-toko-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAPORAN -->
+  <section id="route-laporan" class="route-section">
+    <h2 class="section-title">Laporan Belanja</h2>
+    <div class="card-soft p-3 mb-4">
+      <div class="row g-2 align-items-end">
+        <div class="col-5 col-md-3">
+          <label class="form-label small mb-1">Dari</label>
+          <input type="date" class="form-control form-control-sm" id="lap-dari">
+        </div>
+        <div class="col-5 col-md-3">
+          <label class="form-label small mb-1">Sampai</label>
+          <input type="date" class="form-control form-control-sm" id="lap-sampai">
+        </div>
+        <div class="col-2 col-md-2">
+          <button class="btn btn-navy btn-sm w-100" id="btn-tampilkan-laporan">Tampilkan</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card mb-3">
+      <div class="stat-label">Total Belanja Periode Ini</div>
+      <div class="stat-value" id="lap-total">Rp 0</div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <h3 class="section-title" style="font-size:.95rem;">Per Bahan</h3>
+        <div class="table-responsive card-soft p-2">
+          <table class="table table-sm table-sm-rp mb-0">
+            <tbody id="lap-per-bahan"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <h3 class="section-title" style="font-size:.95rem;">Per Toko</h3>
+        <div class="table-responsive card-soft p-2">
+          <table class="table table-sm table-sm-rp mb-0">
+            <tbody id="lap-per-toko"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="section-title mt-3" style="font-size:.95rem;">Daftar Transaksi</h3>
+    <div class="table-responsive card-soft p-2">
+      <table class="table table-sm table-sm-rp mb-0">
+        <thead><tr><th>Tanggal</th><th>Toko</th><th class="text-end">Total</th></tr></thead>
+        <tbody id="lap-list-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<footer class="app-footer">Buku Peyek &middot; peyek.zasha.online</footer>
+
+<!-- Modal Detail -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailModalLabel">Detail</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="detailModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<datalist id="bahan-list"></datalist>
+<datalist id="toko-list"></datalist>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc,
+  query, orderBy, limit, where, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+/* ======================================================
+   GANTI BAGIAN INI dengan konfigurasi project Firebase
+   Anda sendiri (harus project BARU, jangan pakai project
+   Firestore yang sudah dipakai untuk Buku Kripik / lainnya)
+   ====================================================== */
+const firebaseConfig = {
+  apiKey: "GANTI_DENGAN_API_KEY",
+  authDomain: "GANTI.firebaseapp.com",
+  projectId: "GANTI_PROJECT_ID",
+  storageBucket: "GANTI.appspot.com",
+  messagingSenderId: "GANTI_SENDER_ID",
+  appId: "GANTI_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const authReady = new Promise((resolve) => {
+  onAuthStateChanged(auth, (user) => { if (user) resolve(user); });
+  signInAnonymously(auth).catch((err) => console.error("Auth gagal:", err));
+});
+
+/* ---------- Helper umum ---------- */
+function formatRupiah(num) {
+  return "Rp " + Math.round(num || 0).toLocaleString("id-ID");
+}
+function todayStr(d = new Date()) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+function notify(msg, type = "success") {
+  const el = document.createElement("div");
+  el.className = `alert alert-${type} alert-dismissible fade show shadow-sm`;
+  el.innerHTML = `${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+  document.getElementById("notify-area").appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+async function fetchCollection(name, constraints = []) {
+  const q = constraints.length ? query(collection(db, name), ...constraints) : collection(db, name);
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+/* ---------- Cache di memori ---------- */
+let bahanCache = [];
+let tokoCache = [];
+let produksiCache = [];
+let belanjaCache = [];
+let penjualanCache = [];
+
+/* ---------- Router ---------- */
+const routes = ["beranda", "belanja", "produksi", "penjualan", "master", "laporan"];
+function showRoute() {
+  let hash = location.hash.replace("#/", "") || "beranda";
+  if (!routes.includes(hash)) hash = "beranda";
+  routes.forEach(r => {
+    document.getElementById(`route-${r}`).classList.toggle("active", r === hash);
+  });
+  document.querySelectorAll(".nav-link[data-route]").forEach(a => {
+    a.classList.toggle("active", a.dataset.route === hash);
+  });
+  const nav = document.getElementById("navMain");
+  if (nav.classList.contains("show")) bootstrap.Collapse.getOrCreateInstance(nav).hide();
+
+  if (hash === "beranda") loadBeranda();
+  if (hash === "belanja") loadBelanjaSection();
+  if (hash === "produksi") loadProduksiSection();
+  if (hash === "penjualan") loadPenjualanSection();
+  if (hash === "master") loadMasterSection();
+}
+window.addEventListener("hashchange", showRoute);
+
+/* ---------- Master: Bahan & Toko ---------- */
+async function refreshMasterCache() {
+  bahanCache = await fetchCollection("bahan", [orderBy("nama")]);
+  tokoCache = await fetchCollection("toko", [orderBy("nama")]);
+  document.getElementById("bahan-list").innerHTML = bahanCache.map(b => `<option value="${b.nama}">`).join("");
+  document.getElementById("toko-list").innerHTML = tokoCache.map(t => `<option value="${t.nama}">`).join("");
+}
+
+async function upsertBahanHarga(nama, harga) {
+  if (!nama) return;
+  const existing = bahanCache.find(b => b.nama.toLowerCase() === nama.toLowerCase());
+  if (existing) {
+    await updateDoc(doc(db, "bahan", existing.id), { hargaTerakhir: harga, updatedAt: serverTimestamp() });
+  } else {
+    await addDoc(collection(db, "bahan"), { nama, hargaTerakhir: harga, updatedAt: serverTimestamp() });
+  }
+}
+async function upsertToko(nama) {
+  if (!nama) return;
+  const existing = tokoCache.find(t => t.nama.toLowerCase() === nama.toLowerCase());
+  if (!existing) {
+    await addDoc(collection(db, "toko"), { nama, updatedAt: serverTimestamp() });
+  }
+}
+
+async function loadMasterSection() {
+  await refreshMasterCache();
+  document.getElementById("master-bahan-body").innerHTML = bahanCache.length ? bahanCache.map(b => `
+    <tr>
+      <td>${b.nama}</td>
+      <td class="text-end">${formatRupiah(b.hargaTerakhir)}</td>
+      <td><button class="btn btn-sm btn-outline-danger btn-hapus-bahan" data-id="${b.id}">Hapus</button></td>
+    </tr>`).join("") : `<tr><td colspan="3" class="empty-state">Belum ada bahan master</td></tr>`;
+
+  document.getElementById("master-toko-body").innerHTML = tokoCache.length ? tokoCache.map(t => `
+    <tr>
+      <td>${t.nama}</td>
+      <td><button class="btn btn-sm btn-outline-danger btn-hapus-toko" data-id="${t.id}">Hapus</button></td>
+    </tr>`).join("") : `<tr><td colspan="2" class="empty-state">Belum ada toko master</td></tr>`;
+}
+
+document.getElementById("btn-tambah-master-bahan").addEventListener("click", async () => {
+  const nama = document.getElementById("master-bahan-nama").value.trim();
+  const harga = parseFloat(document.getElementById("master-bahan-harga").value) || 0;
+  if (!nama) return notify("Nama bahan wajib diisi", "danger");
+  await addDoc(collection(db, "bahan"), { nama, hargaTerakhir: harga, updatedAt: serverTimestamp() });
+  document.getElementById("master-bahan-nama").value = "";
+  document.getElementById("master-bahan-harga").value = "";
+  notify("Bahan ditambahkan");
+  loadMasterSection();
+});
+document.getElementById("btn-tambah-master-toko").addEventListener("click", async () => {
+  const nama = document.getElementById("master-toko-nama").value.trim();
+  if (!nama) return notify("Nama toko wajib diisi", "danger");
+  await addDoc(collection(db, "toko"), { nama, updatedAt: serverTimestamp() });
+  document.getElementById("master-toko-nama").value = "";
+  notify("Toko ditambahkan");
+  loadMasterSection();
+});
+document.getElementById("master-bahan-body").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-hapus-bahan");
+  if (!btn) return;
+  if (!confirm("Hapus bahan ini dari master?")) return;
+  await deleteDoc(doc(db, "bahan", btn.dataset.id));
+  loadMasterSection();
+});
+document.getElementById("master-toko-body").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-hapus-toko");
+  if (!btn) return;
+  if (!confirm("Hapus toko ini dari master?")) return;
+  await deleteDoc(doc(db, "toko", btn.dataset.id));
+  loadMasterSection();
+});
+
+/* ---------- Beranda ---------- */
+async function loadBeranda() {
+  const now = new Date();
+  const first = todayStr(new Date(now.getFullYear(), now.getMonth(), 1));
+  const last = todayStr(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+
+  const [belanjaRows, produksiRows, penjualanRows] = await Promise.all([
+    fetchCollection("belanja", [where("tanggal", ">=", first), where("tanggal", "<=", last)]),
+    fetchCollection("produksi", [where("tanggal", ">=", first), where("tanggal", "<=", last)]),
+    fetchCollection("penjualan", [where("tanggal", ">=", first), where("tanggal", "<=", last)])
+  ]);
+
+  const totalBelanja = belanjaRows.reduce((s, r) => s + (r.total || 0), 0);
+  const totalToplesProduksi = produksiRows.reduce((s, r) => s + (r.toples?.jumlah || 0), 0);
+  const totalPenjualan = penjualanRows.reduce((s, r) => s + (r.total || 0), 0);
+  const totalToplesTerjual = penjualanRows.reduce((s, r) => s + (r.qty || 0), 0);
+
+  document.getElementById("dash-belanja").textContent = formatRupiah(totalBelanja);
+  document.getElementById("dash-produksi").textContent = `${produksiRows.length} batch / ${totalToplesProduksi} toples`;
+  document.getElementById("dash-penjualan").textContent = `${formatRupiah(totalPenjualan)} (${totalToplesTerjual} toples)`;
+}
+
+/* ---------- Baris dinamis (bahan) ---------- */
+function makeRow({ withToko, nama = "", toko = "", qty = 1, hargaSatuan = "" } = {}) {
+  const row = document.createElement("div");
+  row.className = "row g-2 align-items-center row-item";
+  row.innerHTML = `
+    <div class="col-12 ${withToko ? "col-md-3" : "col-md-4"}">
+      <input type="text" class="form-control form-control-sm bahan-input" list="bahan-list" placeholder="Nama bahan" value="${nama}">
+    </div>
+    ${withToko ? `<div class="col-6 col-md-3">
+      <input type="text" class="form-control form-control-sm toko-input" list="toko-list" placeholder="Toko (opsional)" value="${toko}">
+    </div>` : ""}
+    <div class="col-3 col-md-2">
+      <input type="number" class="form-control form-control-sm qty-input" placeholder="Qty" value="${qty}" min="0" step="any">
+    </div>
+    <div class="col-4 col-md-2">
+      <input type="number" class="form-control form-control-sm harga-input" placeholder="Harga satuan" value="${hargaSatuan}">
+    </div>
+    <div class="col-4 col-md-2 subtotal-display text-end small">Rp 0</div>
+    <div class="col-1 text-end">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-row">&times;</button>
+    </div>`;
+  return row;
+}
+
+function addBelanjaRow(prefill) {
+  const row = makeRow({ withToko: false, ...prefill });
+  document.getElementById("belanja-items").appendChild(row);
+}
+function addProduksiRow(prefill) {
+  const row = makeRow({ withToko: true, ...prefill });
+  document.getElementById("produksi-items").appendChild(row);
+}
+
+function rowSubtotal(row) {
+  const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
+  const harga = parseFloat(row.querySelector(".harga-input").value) || 0;
+  const subtotal = qty * harga;
+  row.querySelector(".subtotal-display").textContent = formatRupiah(subtotal);
+  return subtotal;
+}
+
+function readRows(containerId, withToko) {
+  return [...document.querySelectorAll(`#${containerId} .row-item`)].map(row => {
+    const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
+    const hargaSatuan = parseFloat(row.querySelector(".harga-input").value) || 0;
+    const item = {
+      nama: row.querySelector(".bahan-input").value.trim(),
+      qty, hargaSatuan, subtotal: qty * hargaSatuan
+    };
+    if (withToko) item.toko = row.querySelector(".toko-input").value.trim();
+    return item;
+  }).filter(r => r.nama);
+}
+
+/* ---------- Belanja ---------- */
+function hitungBelanja() {
+  let total = 0;
+  document.querySelectorAll("#belanja-items .row-item").forEach(row => total += rowSubtotal(row));
+  document.getElementById("belanja-total-display").textContent = formatRupiah(total);
+  return total;
+}
+document.getElementById("belanja-form").addEventListener("input", hitungBelanja);
+document.getElementById("btn-tambah-baris-belanja").addEventListener("click", () => { addBelanjaRow(); hitungBelanja(); });
+document.getElementById("belanja-items").addEventListener("click", (e) => {
+  if (e.target.closest(".remove-row")) {
+    e.target.closest(".row-item").remove();
+    hitungBelanja();
+  }
+});
+
+function resetBelanjaForm() {
+  document.getElementById("belanja-tanggal").value = todayStr();
+  document.getElementById("belanja-toko").value = "";
+  document.getElementById("belanja-items").innerHTML = "";
+  addBelanjaRow();
+  hitungBelanja();
+}
+
+document.getElementById("btn-simpan-belanja").addEventListener("click", async () => {
+  const tanggal = document.getElementById("belanja-tanggal").value || todayStr();
+  const toko = document.getElementById("belanja-toko").value.trim();
+  const items = readRows("belanja-items", false);
+  if (!toko) return notify("Isi nama toko dulu", "danger");
+  if (!items.length) return notify("Isi minimal 1 bahan", "danger");
+
+  const total = items.reduce((s, r) => s + r.subtotal, 0);
+  await addDoc(collection(db, "belanja"), { tanggal, toko, items, total, createdAt: serverTimestamp() });
+  await upsertToko(toko);
+  for (const it of items) await upsertBahanHarga(it.nama, it.hargaSatuan);
+  await refreshMasterCache();
+
+  notify("Belanja tersimpan");
+  resetBelanjaForm();
+  loadRiwayatBelanja();
+});
+
+async function loadRiwayatBelanja() {
+  belanjaCache = await fetchCollection("belanja", [orderBy("createdAt", "desc"), limit(50)]);
+  const tbody = document.getElementById("riwayat-belanja-body");
+  tbody.innerHTML = belanjaCache.length ? belanjaCache.map(r => `
+    <tr>
+      <td>${r.tanggal}</td>
+      <td>${r.toko}</td>
+      <td class="text-end">${formatRupiah(r.total)}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-secondary btn-detail-belanja" data-id="${r.id}">Detail</button>
+        <button class="btn btn-sm btn-outline-danger btn-hapus-belanja" data-id="${r.id}">Hapus</button>
+      </td>
+    </tr>`).join("") : `<tr><td colspan="4" class="empty-state">Belum ada riwayat belanja</td></tr>`;
+}
+document.getElementById("riwayat-belanja-body").addEventListener("click", async (e) => {
+  const detail = e.target.closest(".btn-detail-belanja");
+  const hapus = e.target.closest(".btn-hapus-belanja");
+  if (detail) {
+    const r = belanjaCache.find(x => x.id === detail.dataset.id);
+    if (!r) return;
+    const rowsHtml = r.items.map(it => `<tr><td>${it.nama}</td><td class="text-end">${it.qty} x ${formatRupiah(it.hargaSatuan)}</td><td class="text-end">${formatRupiah(it.subtotal)}</td></tr>`).join("");
+    document.getElementById("detailModalLabel").textContent = `Belanja ${r.tanggal} — ${r.toko}`;
+    document.getElementById("detailModalBody").innerHTML = `<table class="table table-sm"><tbody>${rowsHtml}<tr class="fw-bold"><td colspan="2">Total</td><td class="text-end">${formatRupiah(r.total)}</td></tr></tbody></table>`;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("detailModal")).show();
+  }
+  if (hapus) {
+    if (!confirm("Hapus data belanja ini?")) return;
+    await deleteDoc(doc(db, "belanja", hapus.dataset.id));
+    loadRiwayatBelanja();
+  }
+});
+
+async function loadBelanjaSection() {
+  await refreshMasterCache();
+  if (!document.getElementById("belanja-tanggal").value) resetBelanjaForm();
+  loadRiwayatBelanja();
+}
+
+/* ---------- Produksi ---------- */
+function hitungProduksi() {
+  let totalBahan = 0;
+  document.querySelectorAll("#produksi-items .row-item").forEach(row => totalBahan += rowSubtotal(row));
+
+  const gasHarga = parseFloat(document.getElementById("gas-harga").value) || 0;
+  const gasKapasitas = parseFloat(document.getElementById("gas-kapasitas").value) || 0;
+  const toplesHarga = parseFloat(document.getElementById("toples-harga").value) || 0;
+  const toplesJumlah = parseFloat(document.getElementById("toples-jumlah").value) || 0;
+
+  const biayaGas = gasKapasitas > 0 ? (gasHarga / gasKapasitas) * toplesJumlah : 0;
+  const biayaToples = toplesHarga * toplesJumlah;
+  const totalModal = totalBahan + biayaGas + biayaToples;
+  const hargaPerToples = toplesJumlah > 0 ? totalModal / toplesJumlah : 0;
+
+  document.getElementById("hasil-total-bahan").textContent = formatRupiah(totalBahan);
+  document.getElementById("hasil-biaya-gas").textContent = formatRupiah(biayaGas);
+  document.getElementById("hasil-biaya-toples").textContent = formatRupiah(biayaToples);
+  document.getElementById("hasil-total-modal").textContent = formatRupiah(totalModal);
+  document.getElementById("hasil-harga-per-toples").textContent = formatRupiah(hargaPerToples);
+
+  return { totalBahan, biayaGas, biayaToples, totalModal, hargaPerToples, toplesJumlah, gasHarga, gasKapasitas, toplesHarga };
+}
+document.getElementById("produksi-form").addEventListener("input", hitungProduksi);
+document.getElementById("btn-tambah-baris-produksi").addEventListener("click", () => { addProduksiRow(); hitungProduksi(); });
+document.getElementById("produksi-items").addEventListener("click", (e) => {
+  if (e.target.closest(".remove-row")) {
+    e.target.closest(".row-item").remove();
+    hitungProduksi();
+  }
+});
+
+function resetProduksiForm() {
+  document.getElementById("produksi-tanggal").value = todayStr();
+  document.getElementById("produksi-items").innerHTML = "";
+  document.getElementById("gas-harga").value = "";
+  document.getElementById("gas-kapasitas").value = "";
+  document.getElementById("toples-harga").value = "";
+  document.getElementById("toples-jumlah").value = "";
+  addProduksiRow();
+  hitungProduksi();
+}
+
+document.getElementById("btn-simpan-produksi").addEventListener("click", async () => {
+  const calc = hitungProduksi();
+  if (calc.toplesJumlah <= 0) return notify("Isi jumlah toples dihasilkan", "danger");
+  const bahanItems = readRows("produksi-items", true);
+  if (!bahanItems.length) return notify("Isi minimal 1 bahan", "danger");
+
+  const tanggal = document.getElementById("produksi-tanggal").value || todayStr();
+  const docData = {
+    tanggal,
+    bahanItems,
+    gas: { harga: calc.gasHarga, kapasitas: calc.gasKapasitas },
+    toples: { harga: calc.toplesHarga, jumlah: calc.toplesJumlah },
+    totalBahan: calc.totalBahan,
+    biayaGas: calc.biayaGas,
+    biayaToples: calc.biayaToples,
+    totalModal: calc.totalModal,
+    hargaPerToples: calc.hargaPerToples,
+    createdAt: serverTimestamp()
+  };
+  await addDoc(collection(db, "produksi"), docData);
+  for (const it of bahanItems) {
+    await upsertBahanHarga(it.nama, it.hargaSatuan);
+    if (it.toko) await upsertToko(it.toko);
+  }
+  await refreshMasterCache();
+
+  notify("Produksi tersimpan");
+  resetProduksiForm();
+  loadRiwayatProduksi();
+});
+
+async function loadRiwayatProduksi() {
+  produksiCache = await fetchCollection("produksi", [orderBy("createdAt", "desc"), limit(50)]);
+  const tbody = document.getElementById("riwayat-produksi-body");
+  tbody.innerHTML = produksiCache.length ? produksiCache.map(r => `
+    <tr>
+      <td>${r.tanggal}</td>
+      <td>${r.toples.jumlah}</td>
+      <td class="text-end">${formatRupiah(r.totalModal)}</td>
+      <td class="text-end">${formatRupiah(r.hargaPerToples)}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-secondary btn-detail-produksi" data-id="${r.id}">Detail</button>
+        <button class="btn btn-sm btn-outline-danger btn-hapus-produksi" data-id="${r.id}">Hapus</button>
+      </td>
+    </tr>`).join("") : `<tr><td colspan="5" class="empty-state">Belum ada riwayat produksi</td></tr>`;
+}
+document.getElementById("riwayat-produksi-body").addEventListener("click", async (e) => {
+  const detail = e.target.closest(".btn-detail-produksi");
+  const hapus = e.target.closest(".btn-hapus-produksi");
+  if (detail) {
+    const r = produksiCache.find(x => x.id === detail.dataset.id);
+    if (!r) return;
+    const rowsHtml = r.bahanItems.map(it => `<tr><td>${it.nama}${it.toko ? ` <span class="badge badge-toko">${it.toko}</span>` : ""}</td><td class="text-end">${it.qty} x ${formatRupiah(it.hargaSatuan)}</td><td class="text-end">${formatRupiah(it.subtotal)}</td></tr>`).join("");
+    document.getElementById("detailModalLabel").textContent = `Produksi ${r.tanggal}`;
+    document.getElementById("detailModalBody").innerHTML = `
+      <table class="table table-sm">
+        <tbody>
+          ${rowsHtml}
+          <tr><td colspan="2">Gas</td><td class="text-end">${formatRupiah(r.biayaGas)}</td></tr>
+          <tr><td colspan="2">Toples (${r.toples.jumlah} x ${formatRupiah(r.toples.harga)})</td><td class="text-end">${formatRupiah(r.biayaToples)}</td></tr>
+          <tr class="fw-bold border-top"><td colspan="2">Total Modal</td><td class="text-end">${formatRupiah(r.totalModal)}</td></tr>
+          <tr class="fw-bold"><td colspan="2">Harga / Toples</td><td class="text-end">${formatRupiah(r.hargaPerToples)}</td></tr>
+        </tbody>
+      </table>`;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("detailModal")).show();
+  }
+  if (hapus) {
+    if (!confirm("Hapus data produksi ini?")) return;
+    await deleteDoc(doc(db, "produksi", hapus.dataset.id));
+    loadRiwayatProduksi();
+  }
+});
+
+async function loadProduksiSection() {
+  await refreshMasterCache();
+  const container = document.getElementById("produksi-items");
+  if (!document.getElementById("produksi-tanggal").value) {
+    document.getElementById("produksi-tanggal").value = todayStr();
+  }
+  if (container.children.length === 0) {
+    const lastBatch = await fetchCollection("produksi", [orderBy("createdAt", "desc"), limit(1)]);
+    if (lastBatch.length) {
+      const last = lastBatch[0];
+      last.bahanItems.forEach(item => {
+        const master = bahanCache.find(b => b.nama.toLowerCase() === item.nama.toLowerCase());
+        addProduksiRow({
+          nama: item.nama,
+          toko: item.toko || "",
+          qty: item.qty || 1,
+          hargaSatuan: master ? master.hargaTerakhir : item.hargaSatuan
+        });
+      });
+      document.getElementById("gas-harga").value = last.gas?.harga || "";
+      document.getElementById("gas-kapasitas").value = last.gas?.kapasitas || "";
+      document.getElementById("toples-harga").value = last.toples?.harga || "";
+    } else {
+      addProduksiRow();
+    }
+    hitungProduksi();
+  }
+  loadRiwayatProduksi();
+}
+
+/* ---------- Penjualan ---------- */
+function hitungPenjualan() {
+  const qty = parseFloat(document.getElementById("jual-qty").value) || 0;
+  const harga = parseFloat(document.getElementById("jual-harga").value) || 0;
+  const total = qty * harga;
+  document.getElementById("jual-total-display").textContent = formatRupiah(total);
+  return total;
+}
+document.getElementById("jual-qty").addEventListener("input", hitungPenjualan);
+document.getElementById("jual-harga").addEventListener("input", hitungPenjualan);
+
+function resetPenjualanForm() {
+  document.getElementById("jual-tanggal").value = todayStr();
+  document.getElementById("jual-nama").value = "";
+  document.getElementById("jual-qty").value = "";
+  document.getElementById("jual-harga").value = "";
+  document.getElementById("jual-catatan").value = "";
+  hitungPenjualan();
+}
+
+function cetakNota(sale) {
+  const { jsPDF } = window.jspdf;
+  const docPdf = new jsPDF({ unit: "mm", format: "a5" });
+  const w = docPdf.internal.pageSize.getWidth();
+  let y = 16;
+
+  docPdf.setFontSize(14);
+  docPdf.setFont(undefined, "bold");
+  docPdf.text("Nota Penjualan Peyek", w / 2, y, { align: "center" });
+  docPdf.setFont(undefined, "normal");
+  docPdf.setFontSize(10);
+
+  y += 10;
+  docPdf.text(`Tanggal: ${sale.tanggal}`, 15, y);
+  y += 6;
+  docPdf.text(`Pembeli: ${sale.namaPembeli}`, 15, y);
+  y += 8;
+  docPdf.line(15, y, w - 15, y);
+
+  y += 8;
+  docPdf.text("Peyek Kacang", 15, y);
+  y += 6;
+  docPdf.text(`${sale.qty} toples x ${formatRupiah(sale.hargaJual)}`, 15, y);
+  docPdf.text(formatRupiah(sale.total), w - 15, y, { align: "right" });
+
+  y += 8;
+  docPdf.line(15, y, w - 15, y);
+  y += 8;
+  docPdf.setFont(undefined, "bold");
+  docPdf.text("Total", 15, y);
+  docPdf.text(formatRupiah(sale.total), w - 15, y, { align: "right" });
+  docPdf.setFont(undefined, "normal");
+
+  if (sale.catatan) {
+    y += 8;
+    docPdf.setFontSize(9);
+    docPdf.text(`Catatan: ${sale.catatan}`, 15, y);
+  }
+
+  y += 12;
+  docPdf.setFontSize(9);
+  docPdf.text("Terima kasih", w / 2, y, { align: "center" });
+
+  const namaFile = `nota-${sale.tanggal}-${(sale.namaPembeli || "pembeli").replace(/\s+/g, "_")}.pdf`;
+  docPdf.save(namaFile);
+}
+
+document.getElementById("btn-simpan-penjualan").addEventListener("click", async () => {
+  const tanggal = document.getElementById("jual-tanggal").value || todayStr();
+  const namaPembeli = document.getElementById("jual-nama").value.trim();
+  const qty = parseFloat(document.getElementById("jual-qty").value) || 0;
+  const hargaJual = parseFloat(document.getElementById("jual-harga").value) || 0;
+  const catatan = document.getElementById("jual-catatan").value.trim();
+
+  if (!namaPembeli) return notify("Isi nama pembeli", "danger");
+  if (qty <= 0 || hargaJual <= 0) return notify("Isi jumlah toples dan harga jual dengan benar", "danger");
+
+  const total = qty * hargaJual;
+  const docData = { tanggal, namaPembeli, qty, hargaJual, total, catatan, createdAt: serverTimestamp() };
+  const ref = await addDoc(collection(db, "penjualan"), docData);
+
+  cetakNota({ id: ref.id, ...docData });
+  notify("Penjualan tersimpan, nota diunduh");
+  resetPenjualanForm();
+  loadRiwayatPenjualan();
+});
+
+async function loadRiwayatPenjualan() {
+  penjualanCache = await fetchCollection("penjualan", [orderBy("createdAt", "desc"), limit(50)]);
+  const tbody = document.getElementById("riwayat-penjualan-body");
+  tbody.innerHTML = penjualanCache.length ? penjualanCache.map(r => `
+    <tr>
+      <td>${r.tanggal}</td>
+      <td>${r.namaPembeli}</td>
+      <td class="text-end">${formatRupiah(r.total)}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-secondary btn-cetak-ulang" data-id="${r.id}">Cetak Ulang</button>
+        <button class="btn btn-sm btn-outline-danger btn-hapus-penjualan" data-id="${r.id}">Hapus</button>
+      </td>
+    </tr>`).join("") : `<tr><td colspan="4" class="empty-state">Belum ada riwayat penjualan</td></tr>`;
+}
+document.getElementById("riwayat-penjualan-body").addEventListener("click", async (e) => {
+  const cetak = e.target.closest(".btn-cetak-ulang");
+  const hapus = e.target.closest(".btn-hapus-penjualan");
+  if (cetak) {
+    const r = penjualanCache.find(x => x.id === cetak.dataset.id);
+    if (r) cetakNota(r);
+  }
+  if (hapus) {
+    if (!confirm("Hapus data penjualan ini?")) return;
+    await deleteDoc(doc(db, "penjualan", hapus.dataset.id));
+    loadRiwayatPenjualan();
+  }
+});
+
+async function loadPenjualanSection() {
+  if (!document.getElementById("jual-tanggal").value) resetPenjualanForm();
+  loadRiwayatPenjualan();
+}
+
+/* ---------- Laporan Belanja ---------- */
+document.getElementById("btn-tampilkan-laporan").addEventListener("click", async () => {
+  const dari = document.getElementById("lap-dari").value;
+  const sampai = document.getElementById("lap-sampai").value;
+  if (!dari || !sampai) return notify("Pilih rentang tanggal dulu", "danger");
+
+  const rows = await fetchCollection("belanja", [
+    where("tanggal", ">=", dari),
+    where("tanggal", "<=", sampai),
+    orderBy("tanggal", "desc")
+  ]);
+
+  let total = 0;
+  const perBahan = {};
+  const perToko = {};
+  rows.forEach(r => {
+    total += r.total || 0;
+    perToko[r.toko] = (perToko[r.toko] || 0) + (r.total || 0);
+    (r.items || []).forEach(it => {
+      perBahan[it.nama] = (perBahan[it.nama] || 0) + (it.subtotal || 0);
+    });
+  });
+
+  document.getElementById("lap-total").textContent = formatRupiah(total);
+  document.getElementById("lap-per-bahan").innerHTML = Object.keys(perBahan).length
+    ? Object.entries(perBahan).sort((a, b) => b[1] - a[1]).map(([n, v]) => `<tr><td>${n}</td><td class="text-end">${formatRupiah(v)}</td></tr>`).join("")
+    : `<tr><td class="empty-state">Tidak ada data</td></tr>`;
+  document.getElementById("lap-per-toko").innerHTML = Object.keys(perToko).length
+    ? Object.entries(perToko).sort((a, b) => b[1] - a[1]).map(([n, v]) => `<tr><td>${n}</td><td class="text-end">${formatRupiah(v)}</td></tr>`).join("")
+    : `<tr><td class="empty-state">Tidak ada data</td></tr>`;
+  document.getElementById("lap-list-body").innerHTML = rows.length
+    ? rows.map(r => `<tr><td>${r.tanggal}</td><td>${r.toko}</td><td class="text-end">${formatRupiah(r.total)}</td></tr>`).join("")
+    : `<tr><td colspan="3" class="empty-state">Tidak ada transaksi pada rentang ini</td></tr>`;
+});
+
+/* ---------- Nav aktif saat diklik ---------- */
+document.querySelectorAll(".nav-link[data-route]").forEach(a => {
+  a.addEventListener("click", () => setTimeout(showRoute, 0));
+});
+
+/* ---------- Mulai aplikasi setelah auth siap ---------- */
+authReady.then(async () => {
+  await refreshMasterCache();
+  showRoute();
+}).catch((err) => {
+  notify("Gagal konek ke Firebase. Cek firebaseConfig di index.html.", "danger");
+  console.error(err);
+});
+</script>
+</body>
+</html>
