@@ -387,9 +387,12 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const authReady = new Promise((resolve) => {
+const authReady = new Promise((resolve, reject) => {
   onAuthStateChanged(auth, (user) => { if (user) resolve(user); });
-  signInAnonymously(auth).catch((err) => console.error("Auth gagal:", err));
+  signInAnonymously(auth).catch((err) => {
+    console.error("Auth gagal:", err);
+    reject(err);
+  });
 });
 
 /* ---------- Helper umum ---------- */
@@ -985,7 +988,8 @@ authReady.then(async () => {
   await refreshMasterCache();
   showRoute();
 }).catch((err) => {
-  notify("Gagal konek ke Firebase. Cek firebaseConfig di index.html.", "danger");
+  const detail = err?.code ? ` (${err.code})` : "";
+  notify(`Gagal konek ke Firebase${detail}. Pastikan Anonymous Auth aktif dan Firestore Rules sudah dipublish.`, "danger");
   console.error(err);
 });
 </script>
