@@ -118,7 +118,7 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
 
   <!-- BELANJA -->
   <section id="route-belanja" class="route-section">
-    <h2 class="section-title">Catat Belanja Bahan</h2>
+    <h2 class="section-title" id="belanja-form-title">Catat Belanja Bahan</h2>
     <div class="card-soft p-3 mb-4" id="belanja-form">
       <div class="row g-2 mb-2">
         <div class="col-6 col-md-4">
@@ -145,7 +145,10 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
         <span class="fw-bold" id="belanja-total-display">Rp 0</span>
       </div>
 
-      <button type="button" class="btn btn-navy w-100 mt-3" id="btn-simpan-belanja">Simpan Belanja</button>
+      <div class="d-flex gap-2 mt-3">
+        <button type="button" class="btn btn-navy flex-grow-1" id="btn-simpan-belanja">Simpan Belanja</button>
+        <button type="button" class="btn btn-outline-secondary d-none" id="btn-batal-edit-belanja">Batal Edit</button>
+      </div>
     </div>
 
     <h3 class="section-title" style="font-size:1rem;">Riwayat Belanja</h3>
@@ -911,13 +914,44 @@ document.getElementById("belanja-items").addEventListener("click", (e) => {
   }
 });
 
+/* Data belanja yang sedang diedit — null berarti form sedang dalam mode
+   "catat baru". Riwayat tidak punya form terpisah: form di atas dipakai
+   ulang, sama seperti pola edit-resep di Master. */
+let belanjaEditId = null;
+
 function resetBelanjaForm() {
+  belanjaEditId = null;
+  document.getElementById("belanja-form-title").textContent = "Catat Belanja Bahan";
+  document.getElementById("btn-simpan-belanja").textContent = "Simpan Belanja";
+  document.getElementById("btn-batal-edit-belanja").classList.add("d-none");
+
   document.getElementById("belanja-tanggal").value = todayStr();
   document.getElementById("belanja-toko").value = "";
   document.getElementById("belanja-items").innerHTML = "";
   addBelanjaRow();
   hitungBelanja();
 }
+
+function editBelanja(id) {
+  const r = belanjaCache.find(x => x.id === id);
+  if (!r) return;
+
+  belanjaEditId = id;
+  document.getElementById("belanja-form-title").textContent = `Edit Belanja — ${r.tanggal}`;
+  document.getElementById("btn-simpan-belanja").textContent = "Perbarui Belanja";
+  document.getElementById("btn-batal-edit-belanja").classList.remove("d-none");
+
+  document.getElementById("belanja-tanggal").value = r.tanggal || todayStr();
+  document.getElementById("belanja-toko").value = r.toko || "";
+  document.getElementById("belanja-items").innerHTML = "";
+  (r.items || []).forEach(it => addBelanjaRow({ nama: it.nama, qty: it.qty, hargaSatuan: it.hargaSatuan }));
+  if (!document.getElementById("belanja-items").children.length) addBelanjaRow();
+  hitungBelanja();
+
+  document.getElementById("belanja-form-title").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.getElementById("btn-batal-edit-belanja").addEventListener("click", resetBelanjaForm);
 
 document.getElementById("btn-simpan-belanja").addEventListener("click", async () => {
   const tanggal = document.getElementById("belanja-tanggal").value || todayStr();
@@ -927,14 +961,23 @@ document.getElementById("btn-simpan-belanja").addEventListener("click", async ()
   if (!items.length) return notify("Isi minimal 1 bahan", "danger");
 
   const total = items.reduce((s, r) => s + r.subtotal, 0);
-  await addDoc(collection(db, "belanja"), { tanggal, toko, items, total, createdAt: serverTimestamp() });
+
+  if (belanjaEditId) {
+    // updatedAt, BUKAN createdAt — createdAt menentukan urutan riwayat
+    // (orderBy("createdAt", "desc")), dan mengubahnya saat sekadar
+    // mengoreksi angka akan melompatkan transaksi lama ke atas daftar.
+    await updateDoc(doc(db, "belanja", belanjaEditId), { tanggal, toko, items, total, updatedAt: serverTimestamp() });
+  } else {
+    await addDoc(collection(db, "belanja"), { tanggal, toko, items, total, createdAt: serverTimestamp() });
+  }
+
   await upsertToko(toko);
   // Harga dicatat ATAS NAMA TOKO belanja ini — itu yang bikin perbandingan
   // "toko mana yang murah" terisi sendiri tanpa input tambahan.
   for (const it of items) await upsertBahanHarga(it.nama, it.hargaSatuan, toko);
   await refreshMasterCache();
 
-  notify("Belanja tersimpan");
+  notify(belanjaEditId ? "Belanja diperbarui" : "Belanja tersimpan");
   resetBelanjaForm();
   loadRiwayatBelanja();
 });
@@ -947,15 +990,20 @@ async function loadRiwayatBelanja() {
       <td>${r.tanggal}</td>
       <td>${r.toko}</td>
       <td class="text-end">${formatRupiah(r.total)}</td>
-      <td class="text-end">
+      <td class="text-end text-nowrap">
         <button class="btn btn-sm btn-outline-secondary btn-detail-belanja" data-id="${r.id}">Detail</button>
+        <button class="btn btn-sm btn-outline-secondary btn-edit-belanja" data-id="${r.id}">Edit</button>
         <button class="btn btn-sm btn-outline-danger btn-hapus-belanja" data-id="${r.id}">Hapus</button>
       </td>
     </tr>`).join("") : `<tr><td colspan="4" class="empty-state">Belum ada riwayat belanja</td></tr>`;
 }
 document.getElementById("riwayat-belanja-body").addEventListener("click", async (e) => {
   const detail = e.target.closest(".btn-detail-belanja");
+  const edit = e.target.closest(".btn-edit-belanja");
   const hapus = e.target.closest(".btn-hapus-belanja");
+  if (edit) {
+    editBelanja(edit.dataset.id);
+  }
   if (detail) {
     const r = belanjaCache.find(x => x.id === detail.dataset.id);
     if (!r) return;
