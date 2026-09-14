@@ -131,6 +131,11 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
         </div>
       </div>
 
+      <p class="text-muted mb-2" style="font-size:.75rem;">
+        Pilih toko dulu, lalu ketik nama bahan — harganya terisi sendiri dari harga
+        terakhir bahan itu DI TOKO INI. Kalau harga berubah, timpa saja; master ikut
+        diperbarui saat disimpan.
+      </p>
       <div id="belanja-items"></div>
 
       <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="btn-tambah-baris-belanja">+ Tambah Bahan</button>
@@ -156,10 +161,22 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
   <section id="route-produksi" class="route-section">
     <h2 class="section-title">Kalkulator Produksi Peyek</h2>
     <div class="card-soft p-3 mb-4" id="produksi-form">
-      <label class="form-label small mb-1">Tanggal</label>
-      <input type="date" class="form-control form-control-sm mb-3" id="produksi-tanggal" style="max-width:200px;">
+      <div class="row g-2 mb-3">
+        <div class="col-6 col-md-3">
+          <label class="form-label small mb-1">Tanggal</label>
+          <input type="date" class="form-control form-control-sm" id="produksi-tanggal">
+        </div>
+        <div class="col-6 col-md-5">
+          <label class="form-label small mb-1">Pakai Resep</label>
+          <select class="form-select form-select-sm" id="produksi-resep"></select>
+        </div>
+      </div>
 
       <label class="form-label small mb-1 fw-semibold">Bahan</label>
+      <p class="text-muted mb-2" style="font-size:.75rem;">
+        Harga terisi otomatis dari master bahan (harga toko itu kalau ada, kalau tidak
+        yang termurah). Tetap bisa ditimpa manual kalau harganya berubah.
+      </p>
       <div id="produksi-items"></div>
       <button type="button" class="btn btn-sm btn-outline-secondary mt-1 mb-3" id="btn-tambah-baris-produksi">+ Tambah Bahan</button>
 
@@ -192,7 +209,10 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
         <div class="d-flex justify-content-between"><span class="fw-semibold">Harga / Toples</span><span class="final" id="hasil-harga-per-toples">Rp 0</span></div>
       </div>
 
-      <button type="button" class="btn btn-navy w-100 mt-3" id="btn-simpan-produksi">Simpan Produksi</button>
+      <div class="d-flex gap-2 mt-3">
+        <button type="button" class="btn btn-navy flex-grow-1" id="btn-simpan-produksi">Simpan Produksi</button>
+        <button type="button" class="btn btn-outline-secondary" id="btn-produksi-jadi-resep">Simpan Resep</button>
+      </div>
     </div>
 
     <h3 class="section-title" style="font-size:1rem;">Riwayat Produksi</h3>
@@ -255,13 +275,18 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
         <div class="card-soft p-3 mb-3">
           <div class="d-flex gap-2">
             <input type="text" class="form-control form-control-sm" id="master-bahan-nama" placeholder="Nama bahan">
-            <input type="number" class="form-control form-control-sm" id="master-bahan-harga" placeholder="Harga" style="max-width:120px;">
+            <input type="text" class="form-control form-control-sm" id="master-bahan-toko" list="toko-list" placeholder="Toko" style="max-width:130px;">
+            <input type="number" class="form-control form-control-sm" id="master-bahan-harga" placeholder="Harga" style="max-width:110px;">
             <button class="btn btn-sm btn-navy" id="btn-tambah-master-bahan">+</button>
           </div>
+          <p class="text-muted mb-0 mt-2" style="font-size:.75rem;">
+            Satu bahan = satu baris. Harga tiap toko disimpan di dalamnya — klik
+            <span class="fw-semibold">Harga</span> untuk membandingkan toko mana yang murah.
+          </p>
         </div>
         <div class="table-responsive card-soft p-2">
           <table class="table table-sm table-sm-rp mb-0">
-            <thead><tr><th>Nama</th><th class="text-end">Harga Terakhir</th><th></th></tr></thead>
+            <thead><tr><th>Nama</th><th class="text-end">Termurah</th><th></th></tr></thead>
             <tbody id="master-bahan-body"></tbody>
           </table>
         </div>
@@ -278,6 +303,54 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
           <table class="table table-sm table-sm-rp mb-0">
             <thead><tr><th>Nama</th><th></th></tr></thead>
             <tbody id="master-toko-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <h3 class="section-title" style="font-size:1rem;">Resep</h3>
+        <div class="card-soft p-3 mb-3">
+          <div class="row g-2 mb-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label small mb-1">Nama Resep</label>
+              <input type="text" class="form-control form-control-sm" id="resep-nama" placeholder="mis. Peyek Kacang 1 batch">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-1">Gas / Tabung</label>
+              <input type="number" class="form-control form-control-sm" id="resep-gas-harga" placeholder="22000">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-1">Kapasitas</label>
+              <input type="number" class="form-control form-control-sm" id="resep-gas-kapasitas" placeholder="15">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-1">Harga Toples</label>
+              <input type="number" class="form-control form-control-sm" id="resep-toples-harga" placeholder="17000">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-1">Hasil (toples)</label>
+              <input type="number" class="form-control form-control-sm" id="resep-toples-jumlah" placeholder="4">
+            </div>
+          </div>
+
+          <label class="form-label small mb-1 fw-semibold">Bahan &amp; Takaran</label>
+          <p class="text-muted mb-2" style="font-size:.75rem;">
+            Cukup nama bahan dan takarannya. Harga TIDAK disimpan di resep — diambil
+            otomatis dari master bahan saat resep dipakai, jadi selalu harga terbaru.
+          </p>
+          <div id="resep-items"></div>
+          <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="btn-tambah-baris-resep">+ Tambah Bahan</button>
+
+          <div class="d-flex gap-2 mt-3">
+            <button type="button" class="btn btn-navy btn-sm" id="btn-simpan-resep">Simpan Resep</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="btn-batal-edit-resep">Batal Edit</button>
+          </div>
+        </div>
+
+        <div class="table-responsive card-soft p-2">
+          <table class="table table-sm table-sm-rp mb-0">
+            <thead><tr><th>Nama Resep</th><th>Bahan</th><th class="text-end">Hasil</th><th></th></tr></thead>
+            <tbody id="master-resep-body"></tbody>
           </table>
         </div>
       </div>
@@ -421,9 +494,51 @@ async function fetchCollection(name, constraints = []) {
 /* ---------- Cache di memori ---------- */
 let bahanCache = [];
 let tokoCache = [];
+let resepCache = [];
 let produksiCache = [];
 let belanjaCache = [];
 let penjualanCache = [];
+
+/* ======================================================
+   HARGA BAHAN PER TOKO
+
+   Satu bahan = SATU dokumen, dengan daftar harga di
+   dalamnya (`hargaToko: [{toko, harga, tanggal}]`).
+   Bukan satu dokumen per kombinasi bahan+toko — kalau
+   begitu "Garam Alus" di 4 toko jadi 4 master terpisah,
+   dan setiap kali tambah toko harus daftar ulang semua
+   bahannya (kerja 2x, keluhan 14 September 2026).
+
+   `hargaTerakhir` TETAP diisi untuk data lama yang belum
+   punya hargaToko — supaya master lama tidak tampil
+   kosong setelah pembaruan ini.
+   ====================================================== */
+function cariBahan(nama) {
+  const n = (nama || "").trim().toLowerCase();
+  if (!n) return null;
+  return bahanCache.find(b => (b.nama || "").toLowerCase() === n) || null;
+}
+function daftarHarga(bahan) {
+  return Array.isArray(bahan?.hargaToko) ? bahan.hargaToko.filter(h => h && h.harga > 0) : [];
+}
+function hargaTermurah(bahan) {
+  const list = daftarHarga(bahan);
+  if (!list.length) {
+    return bahan?.hargaTerakhir > 0 ? { toko: "", harga: bahan.hargaTerakhir, tanggal: "" } : null;
+  }
+  return list.reduce((murah, h) => (h.harga < murah.harga ? h : murah));
+}
+/** Harga acuan: harga di toko itu kalau ada, kalau tidak yang termurah. */
+function hargaUntuk(nama, toko) {
+  const bahan = cariBahan(nama);
+  if (!bahan) return null;
+  const t = (toko || "").trim().toLowerCase();
+  if (t) {
+    const cocok = daftarHarga(bahan).find(h => (h.toko || "").toLowerCase() === t);
+    if (cocok) return cocok;
+  }
+  return hargaTermurah(bahan);
+}
 
 /* ---------- Router ---------- */
 const routes = ["beranda", "belanja", "produksi", "penjualan", "master", "laporan"];
@@ -455,13 +570,32 @@ async function refreshMasterCache() {
   document.getElementById("toko-list").innerHTML = tokoCache.map(t => `<option value="${t.nama}">`).join("");
 }
 
-async function upsertBahanHarga(nama, harga) {
-  if (!nama) return;
-  const existing = bahanCache.find(b => b.nama.toLowerCase() === nama.toLowerCase());
+/**
+ * Catat harga sebuah bahan DI SATU TOKO. Dipanggil tiap kali belanja atau
+ * produksi disimpan, jadi master terisi sendiri dari pemakaian sehari-hari
+ * — tidak perlu ada langkah "perbarui master" terpisah yang pasti terlupa.
+ *
+ * harga 0 diabaikan: baris yang belum diisi harganya tidak boleh menghapus
+ * harga yang sudah benar di master.
+ */
+async function upsertBahanHarga(nama, harga, toko = "") {
+  if (!nama || !(harga > 0)) return;
+
+  const namaToko = (toko || "").trim() || "Tanpa toko";
+  const entri = { toko: namaToko, harga, tanggal: todayStr() };
+  const existing = cariBahan(nama);
+
   if (existing) {
-    await updateDoc(doc(db, "bahan", existing.id), { hargaTerakhir: harga, updatedAt: serverTimestamp() });
+    const daftar = Array.isArray(existing.hargaToko) ? [...existing.hargaToko] : [];
+    const idx = daftar.findIndex(h => (h?.toko || "").toLowerCase() === namaToko.toLowerCase());
+    if (idx >= 0) daftar[idx] = entri; else daftar.push(entri);
+    await updateDoc(doc(db, "bahan", existing.id), {
+      hargaTerakhir: harga, hargaToko: daftar, updatedAt: serverTimestamp()
+    });
   } else {
-    await addDoc(collection(db, "bahan"), { nama, hargaTerakhir: harga, updatedAt: serverTimestamp() });
+    await addDoc(collection(db, "bahan"), {
+      nama, hargaTerakhir: harga, hargaToko: [entri], updatedAt: serverTimestamp()
+    });
   }
 }
 async function upsertToko(nama) {
@@ -474,29 +608,139 @@ async function upsertToko(nama) {
 
 async function loadMasterSection() {
   await refreshMasterCache();
-  document.getElementById("master-bahan-body").innerHTML = bahanCache.length ? bahanCache.map(b => `
+  document.getElementById("master-bahan-body").innerHTML = bahanCache.length ? bahanCache.map(b => {
+    const murah = hargaTermurah(b);
+    const jml = daftarHarga(b).length;
+    return `
     <tr>
-      <td>${b.nama}</td>
-      <td class="text-end">${formatRupiah(b.hargaTerakhir)}</td>
-      <td><button class="btn btn-sm btn-outline-danger btn-hapus-bahan" data-id="${b.id}">Hapus</button></td>
-    </tr>`).join("") : `<tr><td colspan="3" class="empty-state">Belum ada bahan master</td></tr>`;
+      <td>
+        ${b.nama}
+        <div class="text-muted" style="font-size:.72rem;">${jml ? `${jml} toko` : "belum ada harga"}</div>
+      </td>
+      <td class="text-end">
+        ${murah ? formatRupiah(murah.harga) : "—"}
+        ${murah && murah.toko ? `<div class="text-muted" style="font-size:.72rem;">${murah.toko}</div>` : ""}
+      </td>
+      <td class="text-end text-nowrap">
+        <button class="btn btn-sm btn-outline-secondary btn-harga-bahan" data-id="${b.id}">Harga</button>
+        <button class="btn btn-sm btn-outline-danger btn-hapus-bahan" data-id="${b.id}">Hapus</button>
+      </td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="3" class="empty-state">Belum ada bahan master</td></tr>`;
 
   document.getElementById("master-toko-body").innerHTML = tokoCache.length ? tokoCache.map(t => `
     <tr>
       <td>${t.nama}</td>
       <td><button class="btn btn-sm btn-outline-danger btn-hapus-toko" data-id="${t.id}">Hapus</button></td>
     </tr>`).join("") : `<tr><td colspan="2" class="empty-state">Belum ada toko master</td></tr>`;
+
+  await refreshResepCache();
+  renderResepList();
+  if (!document.getElementById("resep-items").children.length) addResepRow();
 }
 
 document.getElementById("btn-tambah-master-bahan").addEventListener("click", async () => {
   const nama = document.getElementById("master-bahan-nama").value.trim();
+  const toko = document.getElementById("master-bahan-toko").value.trim();
   const harga = parseFloat(document.getElementById("master-bahan-harga").value) || 0;
   if (!nama) return notify("Nama bahan wajib diisi", "danger");
-  await addDoc(collection(db, "bahan"), { nama, hargaTerakhir: harga, updatedAt: serverTimestamp() });
+
+  // Nama yang sudah ada TIDAK dibuat ulang — cuma ditambah harga tokonya.
+  // Inilah yang membuat satu bahan tetap satu baris walau dijual 5 toko.
+  if (cariBahan(nama)) {
+    if (!(harga > 0)) return notify(`"${nama}" sudah ada di master`, "danger");
+    await upsertBahanHarga(nama, harga, toko);
+    notify(`Harga ${nama} di ${toko || "Tanpa toko"} disimpan`);
+  } else if (harga > 0) {
+    await upsertBahanHarga(nama, harga, toko);
+    notify("Bahan ditambahkan");
+  } else {
+    await addDoc(collection(db, "bahan"), { nama, hargaTerakhir: 0, hargaToko: [], updatedAt: serverTimestamp() });
+    notify("Bahan ditambahkan");
+  }
+  if (toko) await upsertToko(toko);
+
   document.getElementById("master-bahan-nama").value = "";
+  document.getElementById("master-bahan-toko").value = "";
   document.getElementById("master-bahan-harga").value = "";
-  notify("Bahan ditambahkan");
   loadMasterSection();
+});
+
+/* ---------- Modal harga per toko ---------- */
+let bahanHargaAktifId = null;
+// Daftar terurut yang sedang tampil di modal. Tombol hapus menunjuk ke INDEKS
+// daftar ini, bukan menempelkan nama toko ke atribut HTML — nama toko diketik
+// manusia dan satu tanda kutip di dalamnya sudah cukup merusak atributnya.
+let modalHargaList = [];
+
+function renderModalHargaBahan() {
+  const b = bahanCache.find(x => x.id === bahanHargaAktifId);
+  if (!b) return;
+  const list = daftarHarga(b).slice().sort((x, y) => x.harga - y.harga);
+  modalHargaList = list;
+
+  const baris = list.length ? list.map((h, i) => `
+    <tr class="${i === 0 ? "table-success" : ""}">
+      <td>${h.toko || "Tanpa toko"}${i === 0 ? ` <span class="badge bg-success">termurah</span>` : ""}</td>
+      <td class="text-end">${formatRupiah(h.harga)}</td>
+      <td class="text-muted small">${h.tanggal || ""}</td>
+      <td class="text-end"><button class="btn btn-sm btn-outline-danger btn-hapus-harga-toko" data-idx="${i}">&times;</button></td>
+    </tr>`).join("") : `<tr><td colspan="4" class="empty-state">Belum ada harga tercatat</td></tr>`;
+
+  const selisih = list.length > 1
+    ? `<p class="text-muted small mb-2">Selisih termurah vs termahal:
+         <span class="fw-semibold">${formatRupiah(list[list.length - 1].harga - list[0].harga)}</span></p>`
+    : "";
+
+  document.getElementById("detailModalLabel").textContent = `Harga — ${b.nama}`;
+  document.getElementById("detailModalBody").innerHTML = `
+    ${selisih}
+    <table class="table table-sm"><tbody>${baris}</tbody></table>
+    <div class="border-top pt-3">
+      <label class="form-label small mb-1">Tambah / perbarui harga</label>
+      <div class="d-flex gap-2">
+        <input type="text" class="form-control form-control-sm" id="modal-harga-toko" list="toko-list" placeholder="Nama toko">
+        <input type="number" class="form-control form-control-sm" id="modal-harga-nilai" placeholder="Harga" style="max-width:120px;">
+        <button class="btn btn-sm btn-navy" id="btn-simpan-harga-toko">Simpan</button>
+      </div>
+    </div>`;
+}
+
+document.getElementById("master-bahan-body").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-harga-bahan");
+  if (!btn) return;
+  bahanHargaAktifId = btn.dataset.id;
+  renderModalHargaBahan();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("detailModal")).show();
+});
+
+document.getElementById("detailModalBody").addEventListener("click", async (e) => {
+  const b = bahanCache.find(x => x.id === bahanHargaAktifId);
+
+  if (e.target.closest("#btn-simpan-harga-toko")) {
+    if (!b) return;
+    const toko = document.getElementById("modal-harga-toko").value.trim();
+    const harga = parseFloat(document.getElementById("modal-harga-nilai").value) || 0;
+    if (!(harga > 0)) return notify("Isi harganya dulu", "danger");
+    await upsertBahanHarga(b.nama, harga, toko);
+    if (toko) await upsertToko(toko);
+    await refreshMasterCache();
+    renderModalHargaBahan();
+    loadMasterSection();
+    notify("Harga disimpan");
+    return;
+  }
+
+  const hapus = e.target.closest(".btn-hapus-harga-toko");
+  if (hapus && b) {
+    const target = modalHargaList[parseInt(hapus.dataset.idx, 10)];
+    if (!target) return;
+    const sisa = daftarHarga(b).filter(h => h !== target && (h.toko || "") !== (target.toko || ""));
+    await updateDoc(doc(db, "bahan", b.id), { hargaToko: sisa, updatedAt: serverTimestamp() });
+    await refreshMasterCache();
+    renderModalHargaBahan();
+    loadMasterSection();
+  }
 });
 document.getElementById("btn-tambah-master-toko").addEventListener("click", async () => {
   const nama = document.getElementById("master-toko-nama").value.trim();
@@ -559,12 +803,58 @@ function makeRow({ withToko, nama = "", toko = "", qty = 1, hargaSatuan = "" } =
     </div>
     <div class="col-4 col-md-2">
       <input type="number" class="form-control form-control-sm harga-input" placeholder="Harga satuan" value="${hargaSatuan}">
+      <div class="harga-hint text-muted" style="font-size:.7rem;line-height:1.15;margin-top:.15rem;"></div>
     </div>
     <div class="col-4 col-md-2 subtotal-display text-end small">Rp 0</div>
     <div class="col-1 text-end">
       <button type="button" class="btn btn-sm btn-outline-danger remove-row">&times;</button>
     </div>`;
   return row;
+}
+
+/**
+ * Isi harga dari master. Yang diisi otomatis ditandai data-auto="1" supaya
+ * harga yang sudah diketik tangan TIDAK pernah ditimpa saat toko diganti —
+ * kalau tidak, harga hasil koreksi manual akan hilang diam-diam.
+ */
+function isiHargaOtomatis(row, tokoDefault = "") {
+  if (!row) return;
+  const nama = row.querySelector(".bahan-input").value.trim();
+  const hargaInput = row.querySelector(".harga-input");
+  const hint = row.querySelector(".harga-hint");
+  const toko = (row.querySelector(".toko-input")?.value.trim()) || tokoDefault || "";
+
+  const ref = hargaUntuk(nama, toko);
+  if (!ref) { if (hint) hint.textContent = ""; return; }
+
+  const bolehIsi = hargaInput.value === "" || hargaInput.dataset.auto === "1";
+  if (bolehIsi) {
+    hargaInput.value = ref.harga;
+    hargaInput.dataset.auto = "1";
+  }
+
+  if (!hint) return;
+  const tokoSama = toko && ref.toko && ref.toko.toLowerCase() === toko.toLowerCase();
+  if (tokoSama) {
+    hint.textContent = `harga di sini${ref.tanggal ? " · " + ref.tanggal : ""}`;
+  } else if (ref.toko) {
+    hint.textContent = `termurah: ${ref.toko}`;
+  } else {
+    hint.textContent = "harga terakhir";
+  }
+}
+
+function pasangAutoHarga(containerId, getTokoDefault) {
+  const wadah = document.getElementById(containerId);
+  wadah.addEventListener("input", (e) => {
+    if (e.target.classList.contains("harga-input")) {
+      e.target.dataset.auto = "0";   // sudah disentuh tangan, jangan ditimpa
+      return;
+    }
+    if (e.target.classList.contains("bahan-input") || e.target.classList.contains("toko-input")) {
+      isiHargaOtomatis(e.target.closest(".row-item"), getTokoDefault());
+    }
+  });
 }
 
 function addBelanjaRow(prefill) {
@@ -605,6 +895,14 @@ function hitungBelanja() {
   return total;
 }
 document.getElementById("belanja-form").addEventListener("input", hitungBelanja);
+pasangAutoHarga("belanja-items", () => document.getElementById("belanja-toko").value.trim());
+
+// Ganti toko → semua harga otomatis ikut berubah ke harga toko itu.
+document.getElementById("belanja-toko").addEventListener("input", () => {
+  const toko = document.getElementById("belanja-toko").value.trim();
+  document.querySelectorAll("#belanja-items .row-item").forEach(row => isiHargaOtomatis(row, toko));
+  hitungBelanja();
+});
 document.getElementById("btn-tambah-baris-belanja").addEventListener("click", () => { addBelanjaRow(); hitungBelanja(); });
 document.getElementById("belanja-items").addEventListener("click", (e) => {
   if (e.target.closest(".remove-row")) {
@@ -631,7 +929,9 @@ document.getElementById("btn-simpan-belanja").addEventListener("click", async ()
   const total = items.reduce((s, r) => s + r.subtotal, 0);
   await addDoc(collection(db, "belanja"), { tanggal, toko, items, total, createdAt: serverTimestamp() });
   await upsertToko(toko);
-  for (const it of items) await upsertBahanHarga(it.nama, it.hargaSatuan);
+  // Harga dicatat ATAS NAMA TOKO belanja ini — itu yang bikin perbandingan
+  // "toko mana yang murah" terisi sendiri tanpa input tambahan.
+  for (const it of items) await upsertBahanHarga(it.nama, it.hargaSatuan, toko);
   await refreshMasterCache();
 
   notify("Belanja tersimpan");
@@ -701,6 +1001,7 @@ function hitungProduksi() {
   return { totalBahan, biayaGas, biayaToples, totalModal, hargaPerToples, toplesJumlah, gasHarga, gasKapasitas, toplesHarga };
 }
 document.getElementById("produksi-form").addEventListener("input", hitungProduksi);
+pasangAutoHarga("produksi-items", () => "");
 document.getElementById("btn-tambah-baris-produksi").addEventListener("click", () => { addProduksiRow(); hitungProduksi(); });
 document.getElementById("produksi-items").addEventListener("click", (e) => {
   if (e.target.closest(".remove-row")) {
@@ -741,7 +1042,7 @@ document.getElementById("btn-simpan-produksi").addEventListener("click", async (
   };
   await addDoc(collection(db, "produksi"), docData);
   for (const it of bahanItems) {
-    await upsertBahanHarga(it.nama, it.hargaSatuan);
+    await upsertBahanHarga(it.nama, it.hargaSatuan, it.toko);
     if (it.toko) await upsertToko(it.toko);
   }
   await refreshMasterCache();
@@ -795,23 +1096,34 @@ document.getElementById("riwayat-produksi-body").addEventListener("click", async
 
 async function loadProduksiSection() {
   await refreshMasterCache();
+  await refreshResepCache();
   const container = document.getElementById("produksi-items");
   if (!document.getElementById("produksi-tanggal").value) {
     document.getElementById("produksi-tanggal").value = todayStr();
   }
-  if (container.children.length === 0) {
+
+  // Datang dari tombol "Pakai" di daftar resep.
+  if (resepMauDipakai) {
+    document.getElementById("produksi-resep").value = resepMauDipakai;
+    pakaiResep(resepMauDipakai);
+    resepMauDipakai = null;
+  } else if (container.children.length === 0) {
     const lastBatch = await fetchCollection("produksi", [orderBy("createdAt", "desc"), limit(1)]);
     if (lastBatch.length) {
       const last = lastBatch[0];
       last.bahanItems.forEach(item => {
-        const master = bahanCache.find(b => b.nama.toLowerCase() === item.nama.toLowerCase());
+        // Harga toko yang sama dipakai lagi kalau ada — bukan hargaTerakhir
+        // global, yang bisa saja berasal dari toko lain yang lebih mahal.
+        const ref = hargaUntuk(item.nama, item.toko || "");
         addProduksiRow({
           nama: item.nama,
           toko: item.toko || "",
           qty: item.qty || 1,
-          hargaSatuan: master ? master.hargaTerakhir : item.hargaSatuan
+          hargaSatuan: ref ? ref.harga : item.hargaSatuan
         });
       });
+      container.querySelectorAll(".row-item .harga-input").forEach(el => { el.dataset.auto = "1"; });
+      container.querySelectorAll(".row-item").forEach(row => isiHargaOtomatis(row, ""));
       document.getElementById("gas-harga").value = last.gas?.harga || "";
       document.getElementById("gas-kapasitas").value = last.gas?.kapasitas || "";
       document.getElementById("toples-harga").value = last.toples?.harga || "";
@@ -822,6 +1134,218 @@ async function loadProduksiSection() {
   }
   loadRiwayatProduksi();
 }
+
+/* ======================================================
+   RESEP
+
+   Resep menyimpan BAHAN + TAKARAN saja, tanpa harga.
+   Harga sengaja tidak ikut disimpan: harga bahan berubah
+   tiap kulak, dan resep yang membawa harga lama akan
+   diam-diam menghitung modal yang salah. Saat resep
+   dipakai, harga diambil segar dari master bahan.
+   ====================================================== */
+let resepEditId = null;
+let resepMauDipakai = null;
+
+async function refreshResepCache() {
+  resepCache = await fetchCollection("resep", [orderBy("nama")]);
+  isiDropdownResep();
+}
+
+function makeResepRow({ nama = "", qty = 1, satuan = "" } = {}) {
+  const row = document.createElement("div");
+  row.className = "row g-2 align-items-center row-item resep-row";
+  row.innerHTML = `
+    <div class="col-12 col-md-6">
+      <input type="text" class="form-control form-control-sm resep-bahan" list="bahan-list" placeholder="Nama bahan" value="${nama}">
+    </div>
+    <div class="col-5 col-md-3">
+      <input type="number" class="form-control form-control-sm resep-qty" placeholder="Takaran" value="${qty}" min="0" step="any">
+    </div>
+    <div class="col-5 col-md-2">
+      <input type="text" class="form-control form-control-sm resep-satuan" placeholder="kg / butir" value="${satuan}">
+    </div>
+    <div class="col-2 col-md-1 text-end">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-row">&times;</button>
+    </div>`;
+  return row;
+}
+function addResepRow(prefill) {
+  document.getElementById("resep-items").appendChild(makeResepRow(prefill));
+}
+function readResepRows() {
+  return [...document.querySelectorAll("#resep-items .resep-row")].map(row => ({
+    nama: row.querySelector(".resep-bahan").value.trim(),
+    qty: parseFloat(row.querySelector(".resep-qty").value) || 0,
+    satuan: row.querySelector(".resep-satuan").value.trim()
+  })).filter(r => r.nama);
+}
+function resetResepForm() {
+  resepEditId = null;
+  document.getElementById("resep-nama").value = "";
+  document.getElementById("resep-gas-harga").value = "";
+  document.getElementById("resep-gas-kapasitas").value = "";
+  document.getElementById("resep-toples-harga").value = "";
+  document.getElementById("resep-toples-jumlah").value = "";
+  document.getElementById("resep-items").innerHTML = "";
+  addResepRow();
+  document.getElementById("btn-simpan-resep").textContent = "Simpan Resep";
+  document.getElementById("btn-batal-edit-resep").classList.add("d-none");
+}
+
+function renderResepList() {
+  const tbody = document.getElementById("master-resep-body");
+  tbody.innerHTML = resepCache.length ? resepCache.map(r => `
+    <tr>
+      <td>${r.nama}</td>
+      <td class="text-muted small">${(r.items || []).map(i => i.nama).join(", ") || "—"}</td>
+      <td class="text-end">${r.toples?.jumlah || "—"}</td>
+      <td class="text-end text-nowrap">
+        <button class="btn btn-sm btn-gold btn-pakai-resep" data-id="${r.id}">Pakai</button>
+        <button class="btn btn-sm btn-outline-secondary btn-edit-resep" data-id="${r.id}">Edit</button>
+        <button class="btn btn-sm btn-outline-danger btn-hapus-resep" data-id="${r.id}">Hapus</button>
+      </td>
+    </tr>`).join("") : `<tr><td colspan="4" class="empty-state">Belum ada resep. Buat sekali, pakai selamanya.</td></tr>`;
+}
+
+function isiDropdownResep() {
+  const sel = document.getElementById("produksi-resep");
+  if (!sel) return;
+  const terpilih = sel.value;
+  sel.innerHTML = `<option value="">— tanpa resep —</option>` +
+    resepCache.map(r => `<option value="${r.id}">${r.nama}</option>`).join("");
+  sel.value = terpilih;
+}
+
+/** Muat resep ke kalkulator produksi, harga diambil segar dari master. */
+function pakaiResep(id) {
+  const r = resepCache.find(x => x.id === id);
+  if (!r) return;
+
+  const wadah = document.getElementById("produksi-items");
+  wadah.innerHTML = "";
+  (r.items || []).forEach(it => addProduksiRow({ nama: it.nama, qty: it.qty || 1, hargaSatuan: "" }));
+  if (!wadah.children.length) addProduksiRow();
+  wadah.querySelectorAll(".row-item").forEach(row => isiHargaOtomatis(row, ""));
+
+  document.getElementById("gas-harga").value = r.gas?.harga || "";
+  document.getElementById("gas-kapasitas").value = r.gas?.kapasitas || "";
+  document.getElementById("toples-harga").value = r.toples?.harga || "";
+  document.getElementById("toples-jumlah").value = r.toples?.jumlah || "";
+
+  hitungProduksi();
+
+  const belumAdaHarga = (r.items || []).filter(it => !hargaUntuk(it.nama, ""));
+  if (belumAdaHarga.length) {
+    notify(`Resep dimuat. Harga belum ada di master: ${belumAdaHarga.map(i => i.nama).join(", ")}`, "warning");
+  } else {
+    notify(`Resep "${r.nama}" dimuat, harga terisi dari master`);
+  }
+}
+
+document.getElementById("btn-tambah-baris-resep").addEventListener("click", () => addResepRow());
+document.getElementById("resep-items").addEventListener("click", (e) => {
+  if (e.target.closest(".remove-row")) e.target.closest(".resep-row").remove();
+});
+
+document.getElementById("btn-simpan-resep").addEventListener("click", async () => {
+  const nama = document.getElementById("resep-nama").value.trim();
+  const items = readResepRows();
+  if (!nama) return notify("Isi nama resep dulu", "danger");
+  if (!items.length) return notify("Isi minimal 1 bahan", "danger");
+
+  const payload = {
+    nama, items,
+    gas: {
+      harga: parseFloat(document.getElementById("resep-gas-harga").value) || 0,
+      kapasitas: parseFloat(document.getElementById("resep-gas-kapasitas").value) || 0
+    },
+    toples: {
+      harga: parseFloat(document.getElementById("resep-toples-harga").value) || 0,
+      jumlah: parseFloat(document.getElementById("resep-toples-jumlah").value) || 0
+    },
+    updatedAt: serverTimestamp()
+  };
+
+  if (resepEditId) {
+    await updateDoc(doc(db, "resep", resepEditId), payload);
+    notify("Resep diperbarui");
+  } else {
+    await addDoc(collection(db, "resep"), payload);
+    notify("Resep disimpan");
+  }
+  resetResepForm();
+  await refreshResepCache();
+  renderResepList();
+});
+
+document.getElementById("btn-batal-edit-resep").addEventListener("click", resetResepForm);
+
+document.getElementById("master-resep-body").addEventListener("click", async (e) => {
+  const edit = e.target.closest(".btn-edit-resep");
+  const hapus = e.target.closest(".btn-hapus-resep");
+  const pakai = e.target.closest(".btn-pakai-resep");
+
+  if (edit) {
+    const r = resepCache.find(x => x.id === edit.dataset.id);
+    if (!r) return;
+    resepEditId = r.id;
+    document.getElementById("resep-nama").value = r.nama || "";
+    document.getElementById("resep-gas-harga").value = r.gas?.harga || "";
+    document.getElementById("resep-gas-kapasitas").value = r.gas?.kapasitas || "";
+    document.getElementById("resep-toples-harga").value = r.toples?.harga || "";
+    document.getElementById("resep-toples-jumlah").value = r.toples?.jumlah || "";
+    document.getElementById("resep-items").innerHTML = "";
+    (r.items || []).forEach(it => addResepRow(it));
+    if (!document.getElementById("resep-items").children.length) addResepRow();
+    document.getElementById("btn-simpan-resep").textContent = "Perbarui Resep";
+    document.getElementById("btn-batal-edit-resep").classList.remove("d-none");
+    document.getElementById("resep-nama").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  if (hapus) {
+    if (!confirm("Hapus resep ini?")) return;
+    await deleteDoc(doc(db, "resep", hapus.dataset.id));
+    if (resepEditId === hapus.dataset.id) resetResepForm();
+    await refreshResepCache();
+    renderResepList();
+  }
+
+  if (pakai) {
+    resepMauDipakai = pakai.dataset.id;
+    location.hash = "#/produksi";
+  }
+});
+
+document.getElementById("produksi-resep").addEventListener("change", (e) => {
+  if (e.target.value) pakaiResep(e.target.value);
+});
+
+/* Simpan susunan bahan yang sedang dihitung jadi resep baru — supaya batch
+   berikutnya tidak perlu diketik ulang sama sekali. */
+document.getElementById("btn-produksi-jadi-resep").addEventListener("click", async () => {
+  const items = readRows("produksi-items", true).map(it => ({ nama: it.nama, qty: it.qty, satuan: "" }));
+  if (!items.length) return notify("Isi bahannya dulu", "danger");
+
+  const sel = document.getElementById("produksi-resep");
+  const nama = prompt("Nama resep:", sel.value ? sel.selectedOptions[0].text : "");
+  if (!nama || !nama.trim()) return;
+
+  await addDoc(collection(db, "resep"), {
+    nama: nama.trim(), items,
+    gas: {
+      harga: parseFloat(document.getElementById("gas-harga").value) || 0,
+      kapasitas: parseFloat(document.getElementById("gas-kapasitas").value) || 0
+    },
+    toples: {
+      harga: parseFloat(document.getElementById("toples-harga").value) || 0,
+      jumlah: parseFloat(document.getElementById("toples-jumlah").value) || 0
+    },
+    updatedAt: serverTimestamp()
+  });
+  await refreshResepCache();
+  notify(`Resep "${nama.trim()}" disimpan`);
+});
 
 /* ---------- Penjualan ---------- */
 function hitungPenjualan() {
