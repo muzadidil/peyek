@@ -162,7 +162,7 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
 
   <!-- PRODUKSI -->
   <section id="route-produksi" class="route-section">
-    <h2 class="section-title">Kalkulator Produksi Peyek</h2>
+    <h2 class="section-title" id="produksi-form-title">Kalkulator Produksi Peyek</h2>
     <div class="card-soft p-3 mb-4" id="produksi-form">
       <div class="row g-2 mb-3">
         <div class="col-6 col-md-3">
@@ -215,6 +215,7 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
       <div class="d-flex gap-2 mt-3">
         <button type="button" class="btn btn-navy flex-grow-1" id="btn-simpan-produksi">Simpan Produksi</button>
         <button type="button" class="btn btn-outline-secondary" id="btn-produksi-jadi-resep">Simpan Resep</button>
+        <button type="button" class="btn btn-outline-secondary d-none" id="btn-batal-edit-produksi">Batal Edit</button>
       </div>
     </div>
 
@@ -1058,7 +1059,17 @@ document.getElementById("produksi-items").addEventListener("click", (e) => {
   }
 });
 
+/* Sama pola dengan belanjaEditId — null berarti mode "hitung baru", diisi
+   berarti form dipakai ulang untuk mengoreksi batch yang sudah tersimpan. */
+let produksiEditId = null;
+
 function resetProduksiForm() {
+  produksiEditId = null;
+  document.getElementById("produksi-form-title").textContent = "Kalkulator Produksi Peyek";
+  document.getElementById("btn-simpan-produksi").textContent = "Simpan Produksi";
+  document.getElementById("btn-batal-edit-produksi").classList.add("d-none");
+  document.getElementById("produksi-resep").value = "";
+
   document.getElementById("produksi-tanggal").value = todayStr();
   document.getElementById("produksi-items").innerHTML = "";
   document.getElementById("gas-harga").value = "";
@@ -1068,6 +1079,32 @@ function resetProduksiForm() {
   addProduksiRow();
   hitungProduksi();
 }
+
+function editProduksi(id) {
+  const r = produksiCache.find(x => x.id === id);
+  if (!r) return;
+
+  produksiEditId = id;
+  document.getElementById("produksi-form-title").textContent = `Edit Produksi — ${r.tanggal}`;
+  document.getElementById("btn-simpan-produksi").textContent = "Perbarui Produksi";
+  document.getElementById("btn-batal-edit-produksi").classList.remove("d-none");
+  document.getElementById("produksi-resep").value = "";
+
+  document.getElementById("produksi-tanggal").value = r.tanggal || todayStr();
+  document.getElementById("produksi-items").innerHTML = "";
+  (r.bahanItems || []).forEach(it => addProduksiRow({ nama: it.nama, toko: it.toko || "", qty: it.qty, hargaSatuan: it.hargaSatuan }));
+  if (!document.getElementById("produksi-items").children.length) addProduksiRow();
+
+  document.getElementById("gas-harga").value = r.gas?.harga || "";
+  document.getElementById("gas-kapasitas").value = r.gas?.kapasitas || "";
+  document.getElementById("toples-harga").value = r.toples?.harga || "";
+  document.getElementById("toples-jumlah").value = r.toples?.jumlah || "";
+  hitungProduksi();
+
+  document.getElementById("produksi-form-title").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.getElementById("btn-batal-edit-produksi").addEventListener("click", resetProduksiForm);
 
 document.getElementById("btn-simpan-produksi").addEventListener("click", async () => {
   const calc = hitungProduksi();
@@ -1085,17 +1122,25 @@ document.getElementById("btn-simpan-produksi").addEventListener("click", async (
     biayaGas: calc.biayaGas,
     biayaToples: calc.biayaToples,
     totalModal: calc.totalModal,
-    hargaPerToples: calc.hargaPerToples,
-    createdAt: serverTimestamp()
+    hargaPerToples: calc.hargaPerToples
   };
-  await addDoc(collection(db, "produksi"), docData);
+
+  if (produksiEditId) {
+    // updatedAt, bukan createdAt — alasan sama dengan edit belanja: urutan
+    // riwayat (orderBy createdAt desc) tidak boleh melompat cuma karena
+    // batch lama dikoreksi angkanya.
+    await updateDoc(doc(db, "produksi", produksiEditId), { ...docData, updatedAt: serverTimestamp() });
+  } else {
+    await addDoc(collection(db, "produksi"), { ...docData, createdAt: serverTimestamp() });
+  }
+
   for (const it of bahanItems) {
     await upsertBahanHarga(it.nama, it.hargaSatuan, it.toko);
     if (it.toko) await upsertToko(it.toko);
   }
   await refreshMasterCache();
 
-  notify("Produksi tersimpan");
+  notify(produksiEditId ? "Produksi diperbarui" : "Produksi tersimpan");
   resetProduksiForm();
   loadRiwayatProduksi();
 });
@@ -1109,15 +1154,20 @@ async function loadRiwayatProduksi() {
       <td>${r.toples.jumlah}</td>
       <td class="text-end">${formatRupiah(r.totalModal)}</td>
       <td class="text-end">${formatRupiah(r.hargaPerToples)}</td>
-      <td class="text-end">
+      <td class="text-end text-nowrap">
         <button class="btn btn-sm btn-outline-secondary btn-detail-produksi" data-id="${r.id}">Detail</button>
+        <button class="btn btn-sm btn-outline-secondary btn-edit-produksi" data-id="${r.id}">Edit</button>
         <button class="btn btn-sm btn-outline-danger btn-hapus-produksi" data-id="${r.id}">Hapus</button>
       </td>
     </tr>`).join("") : `<tr><td colspan="5" class="empty-state">Belum ada riwayat produksi</td></tr>`;
 }
 document.getElementById("riwayat-produksi-body").addEventListener("click", async (e) => {
   const detail = e.target.closest(".btn-detail-produksi");
+  const edit = e.target.closest(".btn-edit-produksi");
   const hapus = e.target.closest(".btn-hapus-produksi");
+  if (edit) {
+    editProduksi(edit.dataset.id);
+  }
   if (detail) {
     const r = produksiCache.find(x => x.id === detail.dataset.id);
     if (!r) return;
