@@ -201,6 +201,7 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
         <div class="col-6">
           <label class="form-label small mb-1">Jumlah Toples Dihasilkan</label>
           <input type="number" class="form-control form-control-sm" id="toples-jumlah" placeholder="4">
+          <div class="text-muted" id="produksi-skala-hint" style="font-size:.72rem;line-height:1.3;margin-top:.25rem;"></div>
         </div>
       </div>
 
@@ -1065,6 +1066,7 @@ let produksiEditId = null;
 
 function resetProduksiForm() {
   produksiEditId = null;
+  resepSkalaAktif = null;
   document.getElementById("produksi-form-title").textContent = "Kalkulator Produksi Peyek";
   document.getElementById("btn-simpan-produksi").textContent = "Simpan Produksi";
   document.getElementById("btn-batal-edit-produksi").classList.add("d-none");
@@ -1078,6 +1080,7 @@ function resetProduksiForm() {
   document.getElementById("toples-jumlah").value = "";
   addProduksiRow();
   hitungProduksi();
+  tampilkanSkalaHint();
 }
 
 function editProduksi(id) {
@@ -1085,6 +1088,10 @@ function editProduksi(id) {
   if (!r) return;
 
   produksiEditId = id;
+  // Data historis apa adanya, bukan takaran resep — skala otomatis
+  // dimatikan supaya angka yang sudah tercatat tidak diam-diam berubah
+  // saat "Jumlah Toples Dihasilkan" disentuh untuk keperluan lain.
+  resepSkalaAktif = null;
   document.getElementById("produksi-form-title").textContent = `Edit Produksi — ${r.tanggal}`;
   document.getElementById("btn-simpan-produksi").textContent = "Perbarui Produksi";
   document.getElementById("btn-batal-edit-produksi").classList.remove("d-none");
@@ -1100,6 +1107,7 @@ function editProduksi(id) {
   document.getElementById("toples-harga").value = r.toples?.harga || "";
   document.getElementById("toples-jumlah").value = r.toples?.jumlah || "";
   hitungProduksi();
+  tampilkanSkalaHint();
 
   document.getElementById("produksi-form-title").scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -1315,6 +1323,70 @@ function isiDropdownResep() {
   sel.value = terpilih;
 }
 
+/* ======================================================
+   SKALA RESEP → PRODUKSI
+
+   Bug yang dilaporkan user 14 September 2026: modal
+   membengkak (Rp 76.200/toples, seharusnya ~Rp 55.000)
+   karena bahan dimuat sejumlah TAKARAN PENUH resep (mis.
+   resep untuk 7 toples), tapi field "Jumlah Toples
+   Dihasilkan" diubah manual jadi 5 — biaya bahan tidak
+   ikut mengecil, jadi dibagi angka yang lebih kecil dari
+   seharusnya.
+
+   `resepSkalaAktif` menyimpan hasil STANDAR resep (jumlah
+   toples resep ditulis untuk berapa) beserta takaran asli
+   tiap bahan, dikunci per NAMA bahan (bukan indeks baris —
+   supaya tahan kalau seller menambah/menghapus baris
+   manual). Begitu "Jumlah Toples Dihasilkan" diubah,
+   semua takaran bahan yang cocok ikut diskalakan
+   proporsional: qtyBaru = qtyAsli x (toplesBaru / toplesStandar).
+
+   null berarti tidak ada resep aktif (input bahan manual
+   atau muat dari batch terakhir) — di situ scaling tidak
+   pernah dijalankan, field toples-jumlah tetap independen
+   seperti sebelumnya.
+   ====================================================== */
+let resepSkalaAktif = null;
+
+function bulatkanTakaran(n) {
+  return Math.round((n + Number.EPSILON) * 1000) / 1000;
+}
+
+function tampilkanSkalaHint() {
+  const hint = document.getElementById("produksi-skala-hint");
+  if (!hint) return;
+  if (!resepSkalaAktif) { hint.textContent = ""; return; }
+
+  const target = parseFloat(document.getElementById("toples-jumlah").value) || 0;
+  const rasio = resepSkalaAktif.toplesStandar > 0 ? target / resepSkalaAktif.toplesStandar : 0;
+  hint.textContent = `Resep "${resepSkalaAktif.namaResep}" standarnya ${resepSkalaAktif.toplesStandar} toples. `
+    + `Takaran bahan otomatis diskalakan ${Math.round(rasio * 100)}% dari itu.`;
+}
+
+/** Skalakan takaran semua bahan yang cocok nama-nya dengan resep aktif. */
+function skalakanBahanKeToples(targetToples) {
+  if (!resepSkalaAktif || !(resepSkalaAktif.toplesStandar > 0)) return;
+  const rasio = targetToples / resepSkalaAktif.toplesStandar;
+
+  document.querySelectorAll("#produksi-items .row-item").forEach(row => {
+    const nama = row.querySelector(".bahan-input").value.trim().toLowerCase();
+    const qtyAsli = resepSkalaAktif.bahan[nama];
+    if (qtyAsli === undefined) return; // bahan tambahan manual, di luar resep — jangan diutak-atik
+    row.querySelector(".qty-input").value = bulatkanTakaran(qtyAsli * rasio);
+  });
+
+  tampilkanSkalaHint();
+}
+
+document.getElementById("toples-jumlah").addEventListener("input", () => {
+  const target = parseFloat(document.getElementById("toples-jumlah").value) || 0;
+  skalakanBahanKeToples(target);
+  // Listener generik #produksi-form (di bawah) tetap menjalankan
+  // hitungProduksi() lagi lewat bubbling — aman, cuma menghitung ulang
+  // angka yang sama.
+});
+
 /** Muat resep ke kalkulator produksi, harga diambil segar dari master. */
 function pakaiResep(id) {
   const r = resepCache.find(x => x.id === id);
@@ -1330,6 +1402,13 @@ function pakaiResep(id) {
   document.getElementById("gas-kapasitas").value = r.gas?.kapasitas || "";
   document.getElementById("toples-harga").value = r.toples?.harga || "";
   document.getElementById("toples-jumlah").value = r.toples?.jumlah || "";
+
+  // Simpan takaran ASLI resep (sebelum diskalakan apa pun) sebagai acuan —
+  // dikunci per nama bahan, dibaca ulang tiap kali toples-jumlah berubah.
+  const bahanAsli = {};
+  (r.items || []).forEach(it => { bahanAsli[(it.nama || "").trim().toLowerCase()] = it.qty || 0; });
+  resepSkalaAktif = { namaResep: r.nama, toplesStandar: r.toples?.jumlah || 0, bahan: bahanAsli };
+  tampilkanSkalaHint();
 
   hitungProduksi();
 
@@ -1416,7 +1495,15 @@ document.getElementById("master-resep-body").addEventListener("click", async (e)
 });
 
 document.getElementById("produksi-resep").addEventListener("change", (e) => {
-  if (e.target.value) pakaiResep(e.target.value);
+  if (e.target.value) {
+    pakaiResep(e.target.value);
+  } else {
+    // "— tanpa resep —" dipilih lagi: lepas acuan skala, biarkan takaran
+    // yang sudah ada di baris apa adanya (tidak dihapus, cuma tidak lagi
+    // ikut berubah otomatis kalau toples-jumlah diubah).
+    resepSkalaAktif = null;
+    tampilkanSkalaHint();
+  }
 });
 
 /* Simpan susunan bahan yang sedang dihitung jadi resep baru — supaya batch
