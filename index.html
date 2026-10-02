@@ -78,6 +78,7 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
         <li class="nav-item"><a class="nav-link" data-route="beranda" href="#/beranda">Beranda</a></li>
         <li class="nav-item"><a class="nav-link" data-route="belanja" href="#/belanja">Belanja</a></li>
         <li class="nav-item"><a class="nav-link" data-route="produksi" href="#/produksi">Produksi</a></li>
+        <li class="nav-item"><a class="nav-link" data-route="inden" href="#/inden">Inden</a></li>
         <li class="nav-item"><a class="nav-link" data-route="penjualan" href="#/penjualan">Penjualan</a></li>
         <li class="nav-item"><a class="nav-link" data-route="master" href="#/master">Master</a></li>
         <li class="nav-item"><a class="nav-link" data-route="laporan" href="#/laporan">Laporan</a></li>
@@ -229,6 +230,55 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
     </div>
   </section>
 
+  <!-- INDEN -->
+  <section id="route-inden" class="route-section">
+    <h2 class="section-title">Order Inden</h2>
+    <div class="card-soft p-3 mb-4">
+      <div class="row g-2 mb-2">
+        <div class="col-6 col-md-3">
+          <label class="form-label small mb-1">Tanggal Pesan</label>
+          <input type="date" class="form-control form-control-sm" id="inden-tanggal">
+        </div>
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-1">Nama Pemesan</label>
+          <input type="text" class="form-control form-control-sm" id="inden-nama" list="pelanggan-list-inden" placeholder="Ketik atau pilih">
+          <datalist id="pelanggan-list-inden"></datalist>
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-1">Jml Toples</label>
+          <input type="number" class="form-control form-control-sm" id="inden-qty">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label small mb-1">Harga / Toples</label>
+          <input type="number" class="form-control form-control-sm" id="inden-harga">
+        </div>
+      </div>
+      <label class="form-label small mb-1">Catatan (opsional)</label>
+      <input type="text" class="form-control form-control-sm mb-2" id="inden-catatan" placeholder="mis. ambil Sabtu, minta dikemas khusus">
+      <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+        <span class="fw-semibold">Estimasi Total</span>
+        <span class="fw-bold" id="inden-total-display">Rp 0</span>
+      </div>
+      <button type="button" class="btn btn-navy w-100 mt-3" id="btn-simpan-inden">Simpan Inden</button>
+    </div>
+
+    <h3 class="section-title" style="font-size:1rem;">Daftar Inden Menunggu</h3>
+    <div class="table-responsive card-soft p-2 mb-4">
+      <table class="table table-sm table-sm-rp mb-0">
+        <thead><tr><th>Tanggal</th><th>Pemesan</th><th class="text-end">Est. Total</th><th></th></tr></thead>
+        <tbody id="riwayat-inden-body"></tbody>
+      </table>
+    </div>
+
+    <h3 class="section-title" style="font-size:1rem;">Inden Selesai (sudah dijual)</h3>
+    <div class="table-responsive card-soft p-2">
+      <table class="table table-sm table-sm-rp mb-0">
+        <thead><tr><th>Tanggal</th><th>Pemesan</th><th class="text-end">Total</th><th></th></tr></thead>
+        <tbody id="riwayat-inden-selesai-body"></tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- PENJUALAN -->
   <section id="route-penjualan" class="route-section">
     <h2 class="section-title">Catat Penjualan</h2>
@@ -240,7 +290,8 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
         </div>
         <div class="col-6 col-md-4">
           <label class="form-label small mb-1">Nama Pembeli</label>
-          <input type="text" class="form-control form-control-sm" id="jual-nama">
+          <input type="text" class="form-control form-control-sm" id="jual-nama" list="pelanggan-list-jual" placeholder="Ketik atau pilih">
+          <datalist id="pelanggan-list-jual"></datalist>
         </div>
         <div class="col-6 col-md-2">
           <label class="form-label small mb-1">Jml Toples</label>
@@ -297,6 +348,20 @@ footer.app-footer{text-align:center;color:var(--muted);font-size:.8rem;margin-to
         </div>
       </div>
       <div class="col-12 col-md-6">
+        <h3 class="section-title" style="font-size:1rem;">Pelanggan</h3>
+        <div class="card-soft p-3 mb-3">
+          <div class="d-flex gap-2">
+            <input type="text" class="form-control form-control-sm" id="master-pelanggan-nama" placeholder="Nama pelanggan">
+            <input type="tel" class="form-control form-control-sm" id="master-pelanggan-telp" placeholder="No. HP (opsional)" style="max-width:160px;">
+            <button class="btn btn-sm btn-navy" id="btn-tambah-master-pelanggan">+</button>
+          </div>
+        </div>
+        <div class="table-responsive card-soft p-2 mb-3">
+          <table class="table table-sm table-sm-rp mb-0">
+            <thead><tr><th>Nama</th><th>No. HP</th><th></th></tr></thead>
+            <tbody id="master-pelanggan-body"></tbody>
+          </table>
+        </div>
         <h3 class="section-title" style="font-size:1rem;">Toko Kulak</h3>
         <div class="card-soft p-3 mb-3">
           <div class="d-flex gap-2">
@@ -503,6 +568,8 @@ let resepCache = [];
 let produksiCache = [];
 let belanjaCache = [];
 let penjualanCache = [];
+let pelangganCache = [];
+let indenCache = [];
 
 /* ======================================================
    HARGA BAHAN PER TOKO
@@ -546,7 +613,7 @@ function hargaUntuk(nama, toko) {
 }
 
 /* ---------- Router ---------- */
-const routes = ["beranda", "belanja", "produksi", "penjualan", "master", "laporan"];
+const routes = ["beranda", "belanja", "produksi", "inden", "penjualan", "master", "laporan"];
 function showRoute() {
   let hash = location.hash.replace("#/", "") || "beranda";
   if (!routes.includes(hash)) hash = "beranda";
@@ -562,6 +629,7 @@ function showRoute() {
   if (hash === "beranda") loadBeranda();
   if (hash === "belanja") loadBelanjaSection();
   if (hash === "produksi") loadProduksiSection();
+  if (hash === "inden") loadIndenSection();
   if (hash === "penjualan") loadPenjualanSection();
   if (hash === "master") loadMasterSection();
 }
@@ -571,8 +639,12 @@ window.addEventListener("hashchange", showRoute);
 async function refreshMasterCache() {
   bahanCache = await fetchCollection("bahan", [orderBy("nama")]);
   tokoCache = await fetchCollection("toko", [orderBy("nama")]);
+  pelangganCache = await fetchCollection("pelanggan", [orderBy("nama")]);
   document.getElementById("bahan-list").innerHTML = bahanCache.map(b => `<option value="${b.nama}">`).join("");
   document.getElementById("toko-list").innerHTML = tokoCache.map(t => `<option value="${t.nama}">`).join("");
+  const pelangganOpts = pelangganCache.map(p => `<option value="${p.nama}">`).join("");
+  document.getElementById("pelanggan-list-jual").innerHTML = pelangganOpts;
+  document.getElementById("pelanggan-list-inden").innerHTML = pelangganOpts;
 }
 
 /**
@@ -638,6 +710,8 @@ async function loadMasterSection() {
       <td>${t.nama}</td>
       <td><button class="btn btn-sm btn-outline-danger btn-hapus-toko" data-id="${t.id}">Hapus</button></td>
     </tr>`).join("") : `<tr><td colspan="2" class="empty-state">Belum ada toko master</td></tr>`;
+
+  renderMasterPelanggan();
 
   await refreshResepCache();
   renderResepList();
@@ -1650,6 +1724,139 @@ document.getElementById("riwayat-penjualan-body").addEventListener("click", asyn
 async function loadPenjualanSection() {
   if (!document.getElementById("jual-tanggal").value) resetPenjualanForm();
   loadRiwayatPenjualan();
+}
+
+/* ---------- Master Pelanggan ---------- */
+document.getElementById("btn-tambah-master-pelanggan").addEventListener("click", async () => {
+  const nama = document.getElementById("master-pelanggan-nama").value.trim();
+  if (!nama) return notify("Isi nama pelanggan", "danger");
+  const telp = document.getElementById("master-pelanggan-telp").value.trim();
+  const ada = pelangganCache.find(p => p.nama.toLowerCase() === nama.toLowerCase());
+  if (ada) return notify("Pelanggan sudah ada", "danger");
+  await addDoc(collection(db, "pelanggan"), { nama, telp, createdAt: serverTimestamp() });
+  document.getElementById("master-pelanggan-nama").value = "";
+  document.getElementById("master-pelanggan-telp").value = "";
+  notify("Pelanggan ditambahkan");
+  await refreshMasterCache();
+  renderMasterPelanggan();
+});
+
+function renderMasterPelanggan() {
+  const tbody = document.getElementById("master-pelanggan-body");
+  if (!tbody) return;
+  tbody.innerHTML = pelangganCache.length
+    ? pelangganCache.map(p => `<tr>
+        <td>${p.nama}</td>
+        <td>${p.telp || "-"}</td>
+        <td class="text-end"><button class="btn btn-sm btn-outline-danger btn-hapus-pelanggan" data-id="${p.id}">Hapus</button></td>
+      </tr>`).join("")
+    : `<tr><td colspan="3" class="empty-state">Belum ada pelanggan</td></tr>`;
+}
+
+document.getElementById("master-pelanggan-body").addEventListener("click", async (e) => {
+  const hapus = e.target.closest(".btn-hapus-pelanggan");
+  if (!hapus) return;
+  if (!confirm("Hapus pelanggan ini?")) return;
+  await deleteDoc(doc(db, "pelanggan", hapus.dataset.id));
+  await refreshMasterCache();
+  renderMasterPelanggan();
+});
+
+/* ---------- Order Inden ---------- */
+document.getElementById("inden-qty").addEventListener("input", () => {
+  const qty = parseFloat(document.getElementById("inden-qty").value) || 0;
+  const harga = parseFloat(document.getElementById("inden-harga").value) || 0;
+  document.getElementById("inden-total-display").textContent = formatRupiah(qty * harga);
+});
+document.getElementById("inden-harga").addEventListener("input", () => {
+  const qty = parseFloat(document.getElementById("inden-qty").value) || 0;
+  const harga = parseFloat(document.getElementById("inden-harga").value) || 0;
+  document.getElementById("inden-total-display").textContent = formatRupiah(qty * harga);
+});
+
+document.getElementById("btn-simpan-inden").addEventListener("click", async () => {
+  const tanggal = document.getElementById("inden-tanggal").value || todayStr();
+  const nama = document.getElementById("inden-nama").value.trim();
+  const qty = parseFloat(document.getElementById("inden-qty").value) || 0;
+  const harga = parseFloat(document.getElementById("inden-harga").value) || 0;
+  const catatan = document.getElementById("inden-catatan").value.trim();
+  if (!nama) return notify("Isi nama pemesan", "danger");
+  if (qty <= 0 || harga <= 0) return notify("Isi jumlah dan harga dengan benar", "danger");
+  const total = qty * harga;
+  await addDoc(collection(db, "inden"), { tanggal, nama, qty, harga, total, catatan, status: "menunggu", createdAt: serverTimestamp() });
+  notify("Inden tersimpan");
+  document.getElementById("inden-tanggal").value = "";
+  document.getElementById("inden-nama").value = "";
+  document.getElementById("inden-qty").value = "";
+  document.getElementById("inden-harga").value = "";
+  document.getElementById("inden-catatan").value = "";
+  document.getElementById("inden-total-display").textContent = "Rp 0";
+  loadRiwayatInden();
+});
+
+async function loadRiwayatInden() {
+  indenCache = await fetchCollection("inden", [orderBy("createdAt", "desc"), limit(100)]);
+  const menunggu = indenCache.filter(r => r.status === "menunggu");
+  const selesai = indenCache.filter(r => r.status === "selesai");
+
+  const tbody = document.getElementById("riwayat-inden-body");
+  tbody.innerHTML = menunggu.length
+    ? menunggu.map(r => `<tr>
+        <td>${r.tanggal}</td>
+        <td>${r.nama}</td>
+        <td class="text-end">${formatRupiah(r.total)}</td>
+        <td class="text-end" style="white-space:nowrap;">
+          <button class="btn btn-sm btn-gold btn-inden-jual" data-id="${r.id}" title="Pindah ke Penjualan">✓ Jual</button>
+          <button class="btn btn-sm btn-outline-danger btn-hapus-inden" data-id="${r.id}">Hapus</button>
+        </td>
+      </tr>`).join("")
+    : `<tr><td colspan="4" class="empty-state">Tidak ada inden menunggu</td></tr>`;
+
+  const tbodyS = document.getElementById("riwayat-inden-selesai-body");
+  tbodyS.innerHTML = selesai.length
+    ? selesai.map(r => `<tr>
+        <td>${r.tanggal}</td>
+        <td>${r.nama}</td>
+        <td class="text-end">${formatRupiah(r.total)}</td>
+        <td class="text-end"><button class="btn btn-sm btn-outline-danger btn-hapus-inden" data-id="${r.id}">Hapus</button></td>
+      </tr>`).join("")
+    : `<tr><td colspan="4" class="empty-state">Belum ada inden selesai</td></tr>`;
+}
+
+document.getElementById("riwayat-inden-body").addEventListener("click", async (e) => {
+  const jual = e.target.closest(".btn-inden-jual");
+  const hapus = e.target.closest(".btn-hapus-inden");
+  if (jual) {
+    const r = indenCache.find(x => x.id === jual.dataset.id);
+    if (!r) return;
+    if (!confirm(`Pindahkan inden ${r.nama} ke Penjualan?`)) return;
+    const docData = { tanggal: r.tanggal, namaPembeli: r.nama, qty: r.qty, hargaJual: r.harga, total: r.total, catatan: r.catatan || "", createdAt: serverTimestamp() };
+    const ref = await addDoc(collection(db, "penjualan"), docData);
+    await updateDoc(doc(db, "inden", r.id), { status: "selesai" });
+    cetakNota({ id: ref.id, ...docData });
+    notify("Inden dipindah ke Penjualan, nota diunduh");
+    loadRiwayatInden();
+  }
+  if (hapus) {
+    if (!confirm("Hapus data inden ini?")) return;
+    await deleteDoc(doc(db, "inden", hapus.dataset.id));
+    loadRiwayatInden();
+  }
+});
+
+document.getElementById("riwayat-inden-selesai-body").addEventListener("click", async (e) => {
+  const hapus = e.target.closest(".btn-hapus-inden");
+  if (!hapus) return;
+  if (!confirm("Hapus data inden ini?")) return;
+  await deleteDoc(doc(db, "inden", hapus.dataset.id));
+  loadRiwayatInden();
+});
+
+async function loadIndenSection() {
+  if (!document.getElementById("inden-tanggal").value) {
+    document.getElementById("inden-tanggal").value = todayStr();
+  }
+  loadRiwayatInden();
 }
 
 /* ---------- Laporan Belanja ---------- */
